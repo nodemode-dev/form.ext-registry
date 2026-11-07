@@ -1,6 +1,6 @@
 {
   "name": "formext-formwav-podcast-chapters",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "license": "Apache-2.0",
   "description": "Podcast Chapters, a FormWav extension: markers to Podcasting 2.0 chapters JSON and ID3 CHAP frames.",

@@ -23,7 +23,7 @@ Links, image links, embedded images and the episode names are kept in the extens
 
 ## Install
 
-- **Through FormPortal**: open FormPortal, go to Extensions, find Podcast Chapters for FormWav and install it (or choose Install from file and pick `podcast-chapters-0.1.0.formpkg`). In FormWav, open Extensions > Extensions panel, press Open on Podcast Chapters, and allow its permissions when asked.
+- **Through FormPortal**: open FormPortal, go to Extensions, find Podcast Chapters for FormWav and install it (or choose Install from file and pick `podcast-chapters-0.1.1.formpkg`). In FormWav, open Extensions > Extensions panel, press Open on Podcast Chapters, and allow its permissions when asked.
 - **From this folder while developing**: with form.ext's Run in App, or by listing `package/` in `extensions/formwav/dev.json` under FormPortal's folder (see FormWav's `docs/EXTENSIONS.md`). FormWav picks it up within 2 s, with the source Development.
 
 Needs FormWav 2.24.0 or later.
@@ -43,7 +43,7 @@ It does not reach the network.
 ```sh
 npm install          # esbuild 0.25.10 and TypeScript 5.9.3, pinned
 npm run build        # type-checks src/ and bundles it into package/ui/chapters.js
-npm run package      # dist/podcast-chapters-0.1.0.formpkg, with its SHA-256 and size
+npm run package      # dist/podcast-chapters-0.1.1.formpkg, with its SHA-256 and size
 python3 tools/formpkg.py validate package
 ```
 

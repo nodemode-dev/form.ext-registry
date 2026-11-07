@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.1 (2026-11-07)
+
+- The headless commands' notice no longer shows the extension's name twice (FormWav already puts it first).
+- `tools/formpkg.py` is the kit's newer copy.
+- Checked inside FormWav 2.24.0, installed as FormPortal installs it and from a development folder.
+
 ## 0.1.0 (2026-11-07)
 
 First release, for FormWav 2.24.0 (Form Extension Contract, API 1).

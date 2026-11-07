@@ -2,6 +2,20 @@
 
 Newest first. Why the code is the way it is.
 
+## 0.1.1 (2026-11-07) · first run inside FormWav
+
+### src/main.ts · the headless notice
+
+FormWav's host already puts the extension's name before every `ui.notify` message (`Name: message`, as the contract's menu items do), so the notice read "Podcast Chapters: Podcast Chapters: Saved ...". The headless commands now send the message alone.
+
+### tools/formpkg.py
+
+Copied again from the kit (the version that also refuses a package without `api: "1"`, with `native: true` or with a malformed `entry` or `contributes`). This package passes it unchanged.
+
+### Verified for 0.1.1
+
+Installed the way FormPortal installs (the `.formpkg` unzipped into `extensions/formwav/podcast-chapters/<version>/` under a scratch `FORMPORTAL_ROOT`, `enabled.json` as its `ext_save` writes it) in FormWav 2.24.0, then again from `dev.json` pointing at `package/`. A session holding a public-domain LibriVox MP3 (44.095 s, from FormWav's demo pack); Import JSON added three markers and a region as one undo step, and one undo took all four back; rename and move were one step each; Save JSON gave a valid Podcasting 2.0 chapters 1.2.0 file; Write into MP3 gave a copy that ffprobe reads with four chapters and the same length, and mutagen 1.47.0 reads as ID3 2.3 with four CHAP frames and a top-level ordered CTOC without the toc:false chapter; the menu's headless commands, the palette, the engine's `/mcp`, the stdio MCP server and the command line ran them in the window.
+
 ## 0.1.0 (2026-11-07) · first release
 
 ### Choice
