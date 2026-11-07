@@ -1,0 +1,25 @@
+{
+  "format": "formai-package",
+  "format_version": 1,
+  "id": "halftone-separations",
+  "name": "Halftone Separations",
+  "product": "formvis",
+  "kind": "script-plugin",
+  "version": "0.1.0",
+  "author": "nodemode",
+  "licence": "Apache-2.0",
+  "native": false,
+  "permissions": ["document", "files-write"],
+  "minimum_app": "2.1.0",
+  "api": "1",
+  "description": "Splits the open picture into process CMYK or two to four spot-ink plates, screens each plate with its own angle, frequency and dot shape, previews the overprint on your paper colour, and adds the plates as Multiply layers in one undo step or saves them as PNG films for printing.",
+  "entry": { "ui": "ui/index.html" },
+  "contributes": {
+    "panels": [{ "id": "main", "title": "Halftone Separations", "location": "dialog" }],
+    "commands": [
+      { "id": "open", "title": "Separate Picture into Halftone Plates", "panel": "main" },
+      { "id": "add-plates", "title": "Add Halftone Plates as Layers" }
+    ]
+  },
+  "homepage": "https://formai.studio/extensions/#halftone-separations"
+}
