@@ -30,7 +30,11 @@ The last chapter's end is the MP3's length. It comes from the Xing or Info frame
 
 ### src/main.ts · long work
 
-Reading and writing a large MP3 goes through base64 both ways (the contract's `files.*` carry base64); decoding and encoding run in 768 KB chunks with a progress step and a cancel check between chunks. A 57.6 MB, 40-minute MP3 showed progress and cancelled with nothing saved. Headless commands wait for the panel's own start (hello, storage) before running, so they use the saved episode title; they report through `ui.notify` and end with `ext.done`.
+Reading and writing a large MP3 goes through base64 both ways (the contract's `files.*` carry base64); decoding and encoding run in 768 KB chunks with a progress step and a cancel check between chunks. A 57.6 MB, 40-minute MP3 showed progress and cancelled with nothing saved. The decoder no longer copies the whole base64 string to strip whitespace (atob ignores it); on a shared machine with 1 GB free, that copy was enough to get the frame's renderer killed for memory.
+
+### Verified for 0.1.0
+
+36 of 36 checks in Chrome against the kit's `host-bridge.ts` with FormWav-shaped mock handlers and the kit's resolver serving `package/` from a development `dev.json` (sidecar TEST_PLAN). ffprobe reads the written MP3's four chapters with their titles and times (0 to 12, 12 to 90, 90 to 140 and 140 to 170 s) and its UTF-8 artist through the 2.4 to 2.3 conversion; mutagen 1.47.0 reads the CTOC (top level, ordered, the hidden chapter left out, the episode title) and the CHAP sub-frames TIT2, WXXX and APIC; the audio after the tag is byte-identical and the length unchanged (180.024 s). A mutagen-made 2.4 tag with UTF-8 TIT2, TXXX, COMM, USLT, WXXX and APIC converts with every frame read back equal. No horizontal overflow at a 338 px dock and a layout shift of 0 after load. Not yet run inside FormWav itself: its host was not finished during this work. Headless commands wait for the panel's own start (hello, storage) before running, so they use the saved episode title; they report through `ui.notify` and end with `ext.done`.
 
 ### Look
 
