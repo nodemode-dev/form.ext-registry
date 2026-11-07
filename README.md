@@ -31,7 +31,7 @@ Requires formMCP 0.9.0 or later.
 |---|---|
 | `document` | Read the list of Form apps and their tool lists (`tool_list`), and start an app once to list its tools (`tool_load`). Tool Diff never turns apps or tools on or off. |
 | `files-read` | Import a saved tool list or report you choose. |
-| `files-write` | Save the HTML or JSON report where you choose. |
+| `files-write` | Save the HTML or JSON report. formMCP has no save dialog: it asks you to confirm the file name and saves into your Downloads folder. |
 
 No network access. Snapshots stay in formMCP's storage for this extension (at most 256 KB).
 

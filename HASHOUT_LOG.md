@@ -1,5 +1,12 @@
 # HASHOUT_LOG
 
+## 0.1.1 (2026-11-07)
+
+- `tools/formpkg.py` copied again from the kit after the round lead's 07:47 update (it now refuses a missing `api`, `native: true` and malformed `entry` or `contributes`); the package was valid under both.
+- formMCP 0.9.0 states `loaded` is Unix seconds in `docs/EXTENSIONS.md` and its demo shim now gives seconds; the 1e11 test stays for lists saved by older builds.
+- formMCP's `files.save` confirms the name in its own dialog and saves into Downloads (no save dialog in the app); the README's permission line says so. Cancel there reaches the panel as a cancelled save.
+- In formMCP's browser demo no app is installed, so the headless commands find nothing to snapshot or check; the integrator ran them end to end there (menu, CLI, MCP) and the comparison itself in the panel.
+
 ## 0.1.0 (2026-11-07)
 
 - Capability chosen over the Call Profiler. formMCP's API 1 surface keeps the activity log, tracing and hooks away from extensions (`docs/EXTENSIONS.md`: "the safety settings, secrets, hooks, tracing ... are not open to extensions"), and `log.rs`'s `call` events carry name, app, tool, ok, ms, agent and transport but no payload size, so a profiler could only read a `log.jsonl` the person picks by hand and could never chart payloads. The tool list, on the other hand, is open (`tool_list`, `tool_load`), and formMCP keeps only the last list per app: `toolcache::remember` overwrites `tools/<app>.json` on every start, so nothing in formMCP shows what an update added, removed or changed.
