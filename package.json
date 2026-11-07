@@ -1,0 +1,16 @@
+{
+  "name": "formext-formlit-golden-hour",
+  "version": "0.1.0",
+  "private": true,
+  "license": "Apache-2.0",
+  "description": "Golden Hour, a FormLit extension: sun and moon, golden hour, blue hour and twilight at each geotagged photo's place and time, with a sun path and light keywords.",
+  "scripts": {
+    "check": "tsc --noEmit -p .",
+    "build": "tsc --noEmit -p . && esbuild src/main.ts --bundle --format=esm --target=es2020 --minify --legal-comments=none --outfile=package/ui/golden-hour.js && esbuild src/golden-hour.css --minify --outfile=package/ui/golden-hour.css",
+    "package": "python3 tools/formpkg.py build package -o dist"
+  },
+  "devDependencies": {
+    "esbuild": "0.25.12",
+    "typescript": "5.9.3"
+  }
+}
