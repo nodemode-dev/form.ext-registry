@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import base64
 import binascii
+import hashlib
 import json
 import os
 import re
@@ -120,6 +121,18 @@ def read_text(path: Path) -> str | None:
 
 def is_kit_sdk(path: Path) -> bool:
     return path.name == "formext.ts" and registry.KIT_SDK.is_file() and path.read_bytes() == registry.KIT_SDK.read_bytes()
+
+
+def sdk_build_hashes() -> set[str]:
+    listing = Path(__file__).resolve().parent / "sdk_builds.txt"
+    if not listing.is_file():
+        return set()
+    lines = (line.strip() for line in listing.read_text(encoding="utf-8").splitlines())
+    return {line for line in lines if line and not line.startswith("#")}
+
+
+def is_bundled_sdk(path: Path) -> bool:
+    return path.name == "formext.js" and hashlib.sha256(path.read_bytes()).hexdigest() in sdk_build_hashes()
 
 
 def line_of(text: str, pos: int) -> int:
@@ -347,7 +360,7 @@ def used_permissions(folder: Path) -> tuple[set[str], list[str]]:
     where: list[str] = []
     sources = [p for p in walk(folder / "src") if p.suffix.lower() in CODE_EXT and not is_kit_sdk(p)]
     if not sources:
-        sources = [p for p in walk(folder / "package") if p.suffix.lower() in SHIPPED_CODE_EXT]
+        sources = [p for p in walk(folder / "package") if p.suffix.lower() in SHIPPED_CODE_EXT and not is_bundled_sdk(p)]
         where.append("no src/, so the shipped files were read")
     for path in sources:
         text = read_text(path) or ""

@@ -1,0 +1,7 @@
+# SHA-256 of the Form Extension SDK builds that extensions ship unchanged (ui/formext.js).
+# The permissions check skips a shipped file whose bytes match one of these, so the SDK's own
+# method list does not count as permissions the extension uses. Code bans still read it.
+# form.ext 0.1.1 templates/*/ui/formext.js
+781110fbe6aa72c75fe86f037d5754ab32ea042a4afb19761ff3112a179b7b47
+# form.ext 0.1.1 sdk/dist/formext.js
+fea7ecbc1eb0b83776bf3676ddacc0481634ebfb6a34375d28c11228ee32ca47
