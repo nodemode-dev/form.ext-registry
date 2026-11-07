@@ -1,0 +1,25 @@
+{
+  "format": "formai-package",
+  "format_version": 1,
+  "id": "trigger-tester",
+  "name": "Trigger Tester",
+  "product": "formskills",
+  "kind": "script-plugin",
+  "version": "0.1.0",
+  "author": "nodemode",
+  "licence": "Apache-2.0",
+  "native": false,
+  "permissions": ["document", "files-read", "files-write"],
+  "minimum_app": "0.9.0",
+  "api": "1",
+  "description": "Paste or load sample prompts and see which skill each one would trigger. An offline BM25 model of the skills' names and descriptions ranks every skill per prompt, flags pairs that fight for the same prompts, finds skills that never win, lets you try a new description and save it to your copy in one undo step, and saves the report as Markdown or JSON.",
+  "entry": { "ui": "ui/index.html" },
+  "contributes": {
+    "panels": [{ "id": "main", "title": "Trigger Tester", "location": "dock" }],
+    "commands": [
+      { "id": "open", "title": "Test Skill Triggers", "panel": "main" },
+      { "id": "rank", "title": "Rank Skills for Saved Prompts" }
+    ]
+  },
+  "homepage": "https://formai.studio/extensions/#trigger-tester"
+}
