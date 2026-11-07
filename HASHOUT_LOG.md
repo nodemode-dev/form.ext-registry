@@ -1,0 +1,21 @@
+# HASHOUT_LOG
+
+Why the code is the way it is. Newest first.
+
+## 0.1.0
+
+**The file comes from formpdf, read when it is needed.** The contract text gives no way to read the open document's bytes; the gap and a proposed optional `document.read { what: "file" }` are in the round's `contract-issues.md`, and formpdf's host answers it. The panel reads fields from formpdf for matching and preview (cheap, on every `document.changed`) and reads the file only when it makes PDFs, keeping the copy until the document's `id` changes. A host that answers -32602 or -32601 to `file` is remembered as not having it, and the panel asks for the PDF with `files.open` instead, telling the person to save first when the summary says `dirty`. Use another PDF file always opens the picker; such a file stays until another document is opened, and when its fields differ from the open PDF's, Fill the open PDF is off.
+
+**Our own PDF reader and writer, no dependencies.** The brief allows esbuild and TypeScript only, and a PDF library would be most of the package. `src/pdf/` reads classic xref tables, xref streams and object streams (Flate with PNG predictors through `DecompressionStream`), rebuilds the table by scanning when it is damaged, and refuses encrypted files with words that say how to remove the password. Every copy is written whole (classic xref table, no object streams), never as an incremental update: one writer then serves single files and the combined file, and stale signatures or permissions in the source cannot claim a filled copy.
+
+**Combined PDF: shared where it can be, per row where it must.** The pages, fields, widgets and their annotations, and everything that refers to them (closed upward over the reverse reference graph), are copied for each row; everything else (page content, fonts, pictures) is written once and shared. The two-page loan form of 1,500 rows makes a 20.8 MB combined PDF, half the 42.2 MB of the same rows as separate files. Each row's top-level fields go under a new parent field `rowN`, so names never collide and every row stays fillable. Inherited page attributes are copied onto each page because the old page tree is not written.
+
+**Appearances.** A field filled without an appearance shows blank in viewers that do not redraw forms, so every filled text, drop-down and list field gets a new appearance stream: background and border from `/MK` and `/BS`, size and colour from `/DA`, auto size when the size is 0, single line, multi-line with wrapping, comb cells, list rows with the selection highlighted, widget rotation through `/Matrix`. Text is drawn in standard Helvetica with WinAnsi encoding (its own font resource, so a subset font in `/DR` cannot drop glyphs). When a value has characters WinAnsi cannot draw, the copy sets `NeedAppearances` so viewers redraw it, and the preview says so. Check boxes and radio buttons only change `/V` and `/AS`, keeping the form's own on and off pictures.
+
+**Flatten.** Each visible widget's current appearance becomes a form XObject drawn on the page with the matrix that maps its transformed BBox onto `/Rect` (the PDF rule for drawing appearances); the old content is wrapped in `q`/`Q` so its graphics state cannot leak; widgets leave `/Annots` and the AcroForm goes.
+
+**Preview without the file.** The sketch is drawn from the field rectangles formpdf reports (points from the top left), so it works before the file is loaded; Fill the open PDF uses formpdf's own `fill` action through `document.apply`, mapping check boxes to their on state or `Off` and radio buttons to the chosen state, which is what formpdf's `fill_fields` expects.
+
+**Zero flash.** `index.html` holds every section in its final layout; `sync()` keeps keyed children (mapping rows, values, page tabs, SVG boxes) and patches them, so stepping rows only changes text and attributes. The progress bar keeps its space and turns visible; Cancel appears in the same row as Make.
+
+**Problems are counted, not blocking.** A value that does not fit a field is reported per row, and the result line says how many; the copy leaves that list or radio field unset and cuts text to the field's maximum length, as a person filling by hand would see it refused.
