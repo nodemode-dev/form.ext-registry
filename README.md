@@ -2,7 +2,7 @@
 
 A FormEncoder extension that makes the hover previews web players show over a seek bar. Pick a video, set how often and how big the thumbnails are, and it draws them into sprite sheets and writes the WebVTT thumbnails track that points into them, the format most web players read for seek previews. A test player in the panel shows the previews before you save, so you can see the result exactly as a viewer will.
 
-![Scrub Thumbnails in FormEncoder's dock: settings, the test player showing a hover preview, the first sheet and the track](docs/screenshot.png)
+![Scrub Thumbnails as a tab in FormEncoder's right-hand dock: the thumbnail settings, and the test player showing the preview for 0:08 while the pointer hovers its bar](docs/screenshot.png)
 
 ## What it makes
 
