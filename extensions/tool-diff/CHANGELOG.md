@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.2 (2026-11-07)
+
+- Package `tool-diff-0.1.2.formpkg`, 14926 bytes, SHA-256 `99c7f53ef84d2deec4f95c6bb6843d21c31008b304e45408eec87e8117b87935`. Same panel, commands and `ui/` files as 0.1.1; only the manifest's version changed.
+- `package-lock.json` is committed, so `npm ci && npm run build` reproduces `package/ui` byte for byte, as the Form Extension Registry's checks require. The README's build steps use `npm ci`.
+
 ## 0.1.1 (2026-11-07)
 
 - Package `tool-diff-0.1.1.formpkg`, 14925 bytes, SHA-256 `bf4d0a4eabff933c6e464535b3cb0fba4794aa1118ef123d3a0df6baf93979d7`. Same panel and commands as 0.1.0.

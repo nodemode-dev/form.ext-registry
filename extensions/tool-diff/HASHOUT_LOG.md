@@ -1,5 +1,9 @@
 # HASHOUT_LOG
 
+## 0.1.2 (2026-11-07)
+
+- The registry's `tools/check.py` refuses a `package.json` without `package-lock.json` (check 3: `npm ci` needs the lock). The lock was made with `npm install --package-lock-only --ignore-scripts` (npm 10.9.9) against the pinned esbuild 0.25.10 and TypeScript 5.9.3; a clean `npm ci && npm run build` then gave the committed `ui/` files byte for byte. The version rises because 0.1.1 is published and its bytes never change.
+
 ## 0.1.1 (2026-11-07)
 
 - `tools/formpkg.py` copied again from the kit after the round lead's 07:47 update (it now refuses a missing `api`, `native: true` and malformed `entry` or `contributes`); the package was valid under both.

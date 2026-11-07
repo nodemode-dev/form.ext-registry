@@ -1,6 +1,6 @@
 {
   "name": "formext-formmcp-tool-diff",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "private": true,
   "license": "Apache-2.0",
   "description": "Tool Diff, a formMCP extension: snapshot an app's tool list, compare two snapshots, see added, removed and changed tools and arguments with breaking changes flagged.",
