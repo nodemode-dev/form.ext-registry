@@ -1,0 +1,22 @@
+{
+  "format": "formai-package",
+  "format_version": 1,
+  "id": "rehearsal-coach",
+  "name": "Rehearsal Coach",
+  "product": "formdeck",
+  "kind": "script-plugin",
+  "version": "0.1.1",
+  "author": "nodemode",
+  "licence": "Apache-2.0",
+  "native": false,
+  "permissions": ["document"],
+  "minimum_app": "0.32.0",
+  "api": "1",
+  "description": "Set a target talk length, time every slide while you rehearse in the editor, see each slide against its share of the target and your last runs, and write the timings into the speaker notes in one undo step.",
+  "entry": { "ui": "ui/index.html" },
+  "contributes": {
+    "panels": [{ "id": "main", "title": "Rehearsal Coach", "location": "dock" }],
+    "commands": [{ "id": "open", "title": "Open Rehearsal Coach", "panel": "main" }]
+  },
+  "homepage": "https://formai.studio/extensions/#rehearsal-coach"
+}

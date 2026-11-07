@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Rehearsal Coach</title>
+    <style>:root{color-scheme:dark;--bg: #111111;--panel: #111111;--text: #f7f7f7;--muted: #8a8a8b;--accent: #f97316;--border: #2a2a2a;--radius: 6px;--rc-ok: #22c55e;--rc-warn: #fbbf24;--rc-over: #f87171;--rc-cta-bg: #ffffff;--rc-cta-text: #000000;--field: color-mix(in srgb, var(--bg) 70%, #000000);--rc-field: var(--field);--rc-raised: color-mix(in srgb, var(--panel) 88%, var(--text) 8%);--rc-card: color-mix(in srgb, var(--panel) 92%, var(--text) 4%);--rc-line: var(--border);--rc-line-2: color-mix(in srgb, var(--border) 70%, var(--muted));--rc-soft: color-mix(in srgb, var(--accent) 16%, transparent);--rc-font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "Segoe UI", system-ui, sans-serif;--rc-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, monospace;--rc-ctl: 30px;--rc-row: 30px}:root[data-theme=light]{color-scheme:light;--bg: #f5f5f4;--panel: #ffffff;--text: #1c1917;--muted: #6b6b70;--border: #e2e2e4;--rc-ok: #15803d;--rc-warn: #b45309;--rc-over: #dc2626;--rc-cta-bg: var(--text);--rc-cta-text: var(--panel);--field: color-mix(in srgb, var(--panel) 92%, var(--text) 4%)}*{box-sizing:border-box}html,body{height:100%;margin:0}body{background:var(--panel);color:var(--text);font:13px/1.45 var(--rc-font);-webkit-font-smoothing:antialiased}.rc{display:grid;grid-template-rows:auto auto minmax(0,1fr) auto;height:100%;min-height:420px}.rc>section,.rc>footer{padding:10px 12px}.rc>section+section,.rc>footer{border-top:1px solid var(--rc-line)}.rc-plan{display:grid;gap:6px}.rc-plan-row{display:flex;align-items:center;gap:8px;min-width:0}.rc-plan-sub{justify-content:space-between}.rc-field{display:inline-flex;align-items:center;gap:6px;color:var(--muted);font-size:12px}.rc-target .rc-input{width:72px}.rc-input{height:var(--rc-ctl);min-width:0;padding:0 8px;border:1px solid var(--rc-line-2);border-radius:7px;background:var(--rc-field);color:var(--text);font:inherit;font-family:var(--rc-mono);font-size:12px;outline:0}.rc-input:focus-visible{border-color:var(--accent)}.rc-input.is-bad{border-color:var(--rc-over)}.rc-seg{display:inline-flex;flex:1 1 auto;min-width:0;padding:2px;border:1px solid var(--rc-line);border-radius:8px;background:var(--rc-field)}.rc-seg button{flex:1 1 0;min-width:0;height:24px;padding:0 6px;border:0;border-radius:6px;background:transparent;color:var(--muted);font:inherit;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}.rc-seg button[aria-checked=true]{background:var(--rc-raised);color:var(--text)}.rc-seg button:disabled{cursor:default;opacity:.5}.rc-note,.rc-summary,.rc-runs,.rc-status,.rc-where{margin:0;color:var(--muted);font-size:12px}.rc-note{min-width:0;height:18px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}.rc-note.is-warn{color:var(--rc-warn)}.rc-check{display:inline-flex;flex:none;align-items:center;gap:6px;color:var(--muted);font-size:12px;cursor:pointer}.rc-check input{margin:0;accent-color:var(--accent)}.rc-clock{display:grid;gap:8px}.rc-where{height:18px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;color:var(--text);font-weight:600}.rc-big{display:flex;align-items:baseline;gap:8px;height:40px}.rc-big-time{font-family:var(--rc-mono);font-size:32px;font-weight:600;line-height:40px;font-variant-numeric:tabular-nums;letter-spacing:-.5px}.rc-big-of{color:var(--muted);font-size:12px;font-variant-numeric:tabular-nums}.rc-chip{margin-left:auto;display:inline-flex;align-items:center;height:20px;padding:0 8px;border:1px solid var(--rc-line-2);border-radius:999px;color:var(--muted);font-size:11px;white-space:nowrap;align-self:center}.rc-chip[data-tone=ok]{border-color:color-mix(in srgb,var(--rc-ok) 55%,transparent);color:var(--rc-ok)}.rc-chip[data-tone=warn]{border-color:color-mix(in srgb,var(--rc-warn) 55%,transparent);color:var(--rc-warn)}.rc-chip[data-tone=over]{border-color:color-mix(in srgb,var(--rc-over) 55%,transparent);color:var(--rc-over)}.rc-meter{position:relative;height:6px;border-radius:999px;background:var(--rc-field);overflow:hidden}.rc-meter-fill{position:absolute;inset:0 auto 0 0;width:0;border-radius:999px;background:var(--rc-ok);transition:width .2s linear}.rc-meter-mark{position:absolute;top:0;bottom:0;left:80%;width:2px;background:var(--rc-line-2)}.rc-meter[data-tone=warn] .rc-meter-fill{background:var(--rc-warn)}.rc-meter[data-tone=over] .rc-meter-fill{background:var(--rc-over)}.rc-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:0}.rc-stats div{min-width:0;padding:6px 8px;border:1px solid var(--rc-line);border-radius:var(--radius);background:var(--rc-card)}.rc-stats dt{color:var(--muted);font-size:11px}.rc-stats dd{margin:0;overflow:hidden;font-family:var(--rc-mono);font-size:13px;font-variant-numeric:tabular-nums;white-space:nowrap;text-overflow:ellipsis}.rc-controls,.rc-foot-row{display:flex;align-items:center;gap:6px;min-width:0}.rc-grow{flex:1 1 auto}.rc-btn{display:inline-flex;flex:none;align-items:center;justify-content:center;gap:6px;height:var(--rc-ctl);padding:0 10px;border:1px solid var(--rc-line-2);border-radius:7px;background:var(--rc-card);color:var(--text);font:inherit;font-size:13px;white-space:nowrap;cursor:pointer}.rc-btn:hover{background:var(--rc-raised)}.rc-btn:disabled{opacity:.45;cursor:default}.rc-btn:disabled:hover{background:var(--rc-card)}.rc-btn:focus-visible,.rc-seg button:focus-visible,.rc-row:focus-visible{outline:2px solid var(--accent);outline-offset:1px}.rc-primary{border-color:var(--rc-cta-bg);background:var(--rc-cta-bg);color:var(--rc-cta-text);font-weight:500}.rc-primary:hover{background:color-mix(in srgb,var(--rc-cta-bg) 90%,var(--rc-cta-text))}.rc-primary:disabled:hover{background:var(--rc-cta-bg)}.rc-ghost{border-color:transparent;background:transparent;color:var(--muted)}.rc-ghost:hover{background:var(--rc-raised);color:var(--text)}.rc-ghost:disabled:hover{background:transparent}.rc-icon{width:var(--rc-ctl);padding:0}.rc-go{min-width:84px}.rc-ic-pause,.rc[data-state=running] .rc-ic-play{display:none}.rc[data-state=running] .rc-ic-pause{display:block}.rc-summary{height:54px;overflow:hidden;line-height:18px}.rc-summary.is-error,.rc-status.is-error{color:var(--rc-over)}.rc>.rc-list{position:relative;display:grid;grid-template-rows:auto minmax(0,1fr);min-height:0;padding:0}.rc-head,.rc-row{display:grid;grid-template-columns:24px minmax(0,1fr) 56px 44px 44px;align-items:center;gap:6px;padding:0 12px}.rc-head{height:28px;border-bottom:1px solid var(--rc-line);color:var(--muted);font-size:11px}.rc-c-plan,.rc-c-run,.rc-c-last{text-align:right}.rc-rows{margin:0;padding:0;overflow-y:auto;overscroll-behavior:contain;list-style:none}.rc-row{position:relative;height:var(--rc-row);color:var(--text);font-size:12px;cursor:pointer}.rc-row:hover{background:var(--rc-card)}.rc-row.is-current{background:var(--rc-soft)}.rc-row.is-current:before{content:"";position:absolute;left:0;top:4px;bottom:4px;width:2px;border-radius:2px;background:var(--accent)}.rc-row.is-hidden .rc-r-title{color:var(--muted);font-style:italic}.rc-r-n{color:var(--muted);font-variant-numeric:tabular-nums}.rc-r-title{overflow:hidden;white-space:nowrap;text-overflow:ellipsis}.rc-r-run,.rc-r-last{font-family:var(--rc-mono);font-size:11px;text-align:right;font-variant-numeric:tabular-nums}.rc-r-last{color:var(--muted)}.rc-r-run[data-tone=ok]{color:var(--rc-ok)}.rc-r-run[data-tone=warn]{color:var(--rc-warn)}.rc-r-run[data-tone=over]{color:var(--rc-over)}.rc-r-plan{width:56px;height:22px;padding:0 4px;font-size:11px;text-align:right;border-color:transparent;background:transparent}.rc-r-plan:hover{border-color:var(--rc-line-2)}.rc-r-plan.is-pinned{border-color:color-mix(in srgb,var(--accent) 50%,transparent);color:var(--accent)}.rc-r-bar{position:absolute;left:12px;right:12px;bottom:2px;height:2px;border-radius:2px;background:transparent;pointer-events:none}.rc-r-bar>span{display:block;height:100%;width:0;border-radius:2px;background:var(--rc-ok)}.rc-r-bar[data-tone=warn]>span{background:var(--rc-warn)}.rc-r-bar[data-tone=over]>span{background:var(--rc-over)}.rc-empty{position:absolute;inset:40px 12px auto;margin:0;color:var(--muted);font-size:12px;text-align:center}.rc-empty[hidden]{display:none}.rc-foot{display:grid;gap:8px}.rc-runs{height:18px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-variant-numeric:tabular-nums}.rc-status{height:18px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}.rc-status.is-ok{color:var(--rc-ok)}</style>
+  </head>
+  <body>
+    <main class="rc" data-state="idle">
+      <section class="rc-plan" aria-label="Plan">
+        <div class="rc-plan-row">
+          <label class="rc-field rc-target">
+            <span>Target</span>
+            <input class="rc-input" id="target" type="text" inputmode="numeric" value="10:00" spellcheck="false" autocomplete="off" aria-describedby="plan-note" />
+          </label>
+          <div class="rc-seg" role="radiogroup" aria-label="Split the target">
+            <button type="button" role="radio" data-split="even" aria-checked="true">Evenly</button>
+            <button type="button" role="radio" data-split="last" aria-checked="false">Like last run</button>
+          </div>
+        </div>
+        <div class="rc-plan-row rc-plan-sub">
+          <p class="rc-note" id="plan-note">Reading the deck</p>
+          <label class="rc-check"><input type="checkbox" id="hidden" /><span>Hidden</span></label>
+        </div>
+      </section>
+
+      <section class="rc-clock" aria-label="Rehearsal">
+        <p class="rc-where"><span id="where">No run yet</span></p>
+        <div class="rc-big">
+          <span class="rc-big-time" id="slide-time">0:00</span>
+          <span class="rc-big-of">of <span id="slide-plan">0:00</span></span>
+          <span class="rc-chip" id="slide-diff" data-tone="none">ready</span>
+        </div>
+        <div class="rc-meter" aria-hidden="true"><span class="rc-meter-fill" id="slide-meter"></span><span class="rc-meter-mark"></span></div>
+        <dl class="rc-stats">
+          <div><dt>Elapsed</dt><dd id="elapsed">0:00</dd></div>
+          <div><dt>Left</dt><dd id="left">0:00</dd></div>
+          <div><dt>Pace</dt><dd id="pace">Not yet</dd></div>
+        </dl>
+        <div class="rc-controls">
+          <button class="rc-btn rc-icon" type="button" data-act="back" title="Previous slide (Left Arrow)" aria-label="Previous slide" disabled>
+            <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M10 3.5 5.5 8l4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <button class="rc-btn rc-primary rc-go" type="button" data-act="go" title="Start the run from the first slide (Space)">
+            <svg class="rc-ic-play" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M5 3.2v9.6L12.6 8z" fill="currentColor"/></svg>
+            <svg class="rc-ic-pause" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M5 3.5v9M11 3.5v9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            <span id="go-label">Start</span>
+          </button>
+          <button class="rc-btn rc-icon" type="button" data-act="next" title="Next slide (Space or Right Arrow)" aria-label="Next slide" disabled>
+            <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M6 3.5 10.5 8 6 12.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <span class="rc-grow"></span>
+          <button class="rc-btn" type="button" data-act="finish" title="End the run and keep it" disabled>
+            <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M4 14V2.5M4 3h7.5l-1.5 2.5 1.5 2.5H4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span>Finish</span>
+          </button>
+          <button class="rc-btn rc-ghost rc-icon" type="button" data-act="cancel" title="Stop and discard this run (Esc)" aria-label="Cancel the run" disabled>
+            <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          </button>
+        </div>
+        <p class="rc-summary" id="summary" aria-live="polite">Press Start, then move through the slides here or in FormDeck. Each slide's time is kept against its share of the target.</p>
+      </section>
+
+      <section class="rc-list" aria-label="Slides">
+        <div class="rc-head" role="row">
+          <span class="rc-c-n">#</span><span class="rc-c-title">Slide</span><span class="rc-c-plan">Plan</span><span class="rc-c-run">Run</span><span class="rc-c-last">Last</span>
+        </div>
+        <ol class="rc-rows" id="rows"></ol>
+        <p class="rc-empty" id="empty">Reading the deck</p>
+      </section>
+
+      <footer class="rc-foot">
+        <p class="rc-runs" id="runs">No runs kept for this deck yet.</p>
+        <div class="rc-foot-row">
+          <button class="rc-btn rc-primary" type="button" data-act="write" title="Put each slide's time from the latest run into its speaker notes, in one step you can undo" disabled>
+            <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M3.5 2.5h6l3 3v8h-9z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M5.5 8h5M5.5 10.5h3.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+            <span>Write to notes</span>
+          </button>
+          <button class="rc-btn rc-ghost" type="button" data-act="unwrite" title="Take the Rehearsal Coach lines out of the speaker notes" disabled>Remove from notes</button>
+          <span class="rc-grow"></span>
+          <button class="rc-btn rc-ghost rc-icon" type="button" data-act="clear" title="Forget the runs kept for this deck" aria-label="Forget runs" disabled>
+            <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M3 4.5h10M6.5 4.5V3h3v1.5M4.5 4.5l.6 8.5h5.8l.6-8.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+        <p class="rc-status" id="status" role="status" aria-live="polite">&nbsp;</p>
+      </footer>
+    </main>
+    <script type="module" src="coach.js"></script>
+  </body>
+</html>
