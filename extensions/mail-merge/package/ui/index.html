@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Mail Merge</title>
+    <link rel="stylesheet" href="mail-merge.css" />
+  </head>
+  <body>
+    <main class="mm" id="mm">
+      <section class="mm-sec" aria-labelledby="h-template">
+        <h2 class="mm-h" id="h-template"><span class="mm-step">1</span>Form</h2>
+        <div class="mm-card">
+          <svg class="mm-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M14 3v5h5M8.5 13h7M8.5 16.5h4.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div class="mm-card-text">
+            <div class="mm-title" id="tpl-name">Reading the open PDF</div>
+            <div class="mm-sub" id="tpl-sub">&nbsp;</div>
+          </div>
+        </div>
+        <p class="mm-note" id="tpl-note">&nbsp;</p>
+        <div class="mm-btns">
+          <button class="mm-btn" type="button" id="tpl-file">Use another PDF file</button>
+        </div>
+      </section>
+
+      <section class="mm-sec" aria-labelledby="h-data">
+        <h2 class="mm-h" id="h-data"><span class="mm-step">2</span>Data</h2>
+        <div class="mm-card">
+          <svg class="mm-ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M3.5 9.5h17M3.5 14.5h17M9.5 9.5v10" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+          <div class="mm-card-text">
+            <div class="mm-title" id="csv-name">No data yet</div>
+            <div class="mm-sub" id="csv-sub">A CSV file with a header row: one row per filled PDF</div>
+          </div>
+        </div>
+        <div class="mm-btns">
+          <button class="mm-btn" type="button" id="csv-open">Choose CSV</button>
+          <button class="mm-btn mm-btn-quiet" type="button" id="csv-paste-toggle" aria-expanded="false" aria-controls="csv-paste-box">Paste rows</button>
+        </div>
+        <div class="mm-paste" id="csv-paste-box" hidden>
+          <textarea class="mm-input mm-area" id="csv-paste" rows="5" spellcheck="false" aria-label="Rows to paste, the first line being the column names" placeholder="name,email,plan&#10;Ana Rivera,ana@example.org,Gold"></textarea>
+          <div class="mm-btns"><button class="mm-btn" type="button" id="csv-paste-use">Use these rows</button></div>
+        </div>
+        <p class="mm-msg" id="data-msg" role="status">&nbsp;</p>
+      </section>
+
+      <section class="mm-sec" aria-labelledby="h-map">
+        <div class="mm-hrow">
+          <h2 class="mm-h" id="h-map"><span class="mm-step">3</span>Match fields</h2>
+          <span class="mm-badge" id="map-count">0 of 0</span>
+        </div>
+        <p class="mm-empty" id="map-empty">Load a form and a CSV to match columns to fields.</p>
+        <div class="mm-map" id="map-list" role="list"></div>
+        <div class="mm-btns">
+          <button class="mm-btn mm-btn-quiet" type="button" id="map-auto" disabled>Match by name again</button>
+        </div>
+      </section>
+
+      <section class="mm-sec" aria-labelledby="h-preview">
+        <div class="mm-hrow">
+          <h2 class="mm-h" id="h-preview"><span class="mm-step">4</span>Preview</h2>
+          <span class="mm-badge mm-badge-warn" id="pv-problems" hidden>0 problems</span>
+        </div>
+        <div class="mm-stepper">
+          <button class="mm-icon-btn" type="button" id="pv-prev" aria-label="Previous row" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 6 8.5 12l6 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          <label class="mm-row-label">Row <input class="mm-input mm-num" id="pv-row" type="number" min="1" value="1" disabled /> of <span id="pv-total">0</span></label>
+          <button class="mm-icon-btn" type="button" id="pv-next" aria-label="Next row" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9.5 6 6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          <button class="mm-btn mm-btn-quiet mm-push" type="button" id="pv-next-problem" hidden>Next problem</button>
+        </div>
+        <div class="mm-pages" id="pv-pages" role="tablist" aria-label="Page"></div>
+        <div class="mm-sheet" id="pv-sheet">
+          <svg class="mm-svg" id="pv-svg" viewBox="0 0 612 792" role="img" aria-label="Where each value lands on the page"><rect class="mm-paper" id="pv-paper" x="0" y="0" width="612" height="792"/><g id="pv-boxes"></g></svg>
+        </div>
+        <div class="mm-values" id="pv-values" role="list"></div>
+        <div class="mm-btns">
+          <button class="mm-btn" type="button" id="pv-show" disabled>Fill the open PDF with this row</button>
+        </div>
+        <p class="mm-msg" id="pv-msg" role="status">&nbsp;</p>
+      </section>
+
+      <section class="mm-sec" aria-labelledby="h-make">
+        <h2 class="mm-h" id="h-make"><span class="mm-step">5</span>Make PDFs</h2>
+        <div class="mm-seg" role="radiogroup" aria-label="Output">
+          <label class="mm-seg-item"><input type="radio" name="mode" value="zip" checked /><span>One PDF per row</span></label>
+          <label class="mm-seg-item"><input type="radio" name="mode" value="combined" /><span>One combined PDF</span></label>
+        </div>
+        <label class="mm-field" id="name-field"><span class="mm-label">File names</span><input class="mm-input" id="out-pattern" type="text" value="{file} {row}" spellcheck="false" /><span class="mm-hint" id="out-pattern-hint">Column names in braces, plus {row} and {file}</span></label>
+        <label class="mm-field"><span class="mm-label">Rows</span><input class="mm-input" id="out-rows" type="text" placeholder="All rows, or for example 1-10, 15" spellcheck="false" /></label>
+        <label class="mm-check"><input type="checkbox" id="out-flatten" /><span>Flatten: values become part of the page and can no longer be edited</span></label>
+        <div class="mm-btns">
+          <button class="mm-btn mm-btn-accent" type="button" id="make" disabled>Make PDFs</button>
+          <button class="mm-btn" type="button" id="cancel" hidden>Cancel</button>
+        </div>
+        <div class="mm-progress" id="progress" aria-hidden="true"><div class="mm-bar" id="bar"></div></div>
+        <p class="mm-msg" id="make-msg" role="status">&nbsp;</p>
+      </section>
+    </main>
+    <script type="module" src="mail-merge.js"></script>
+  </body>
+</html>

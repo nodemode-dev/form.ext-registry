@@ -1,0 +1,22 @@
+{
+  "format": "formai-package",
+  "format_version": 1,
+  "id": "mail-merge",
+  "name": "Mail Merge",
+  "product": "formpdf",
+  "kind": "script-plugin",
+  "version": "0.1.0",
+  "author": "nodemode",
+  "licence": "Apache-2.0",
+  "native": false,
+  "permissions": ["document", "files-read", "files-write"],
+  "minimum_app": "0.59.0",
+  "api": "1",
+  "description": "Fills the open PDF's form once for every row of a CSV: match columns to fields, preview any row on the page or in the open PDF, then save one filled PDF per row in a zip, or one combined PDF.",
+  "entry": { "ui": "ui/index.html" },
+  "contributes": {
+    "panels": [{ "id": "main", "title": "Mail Merge", "location": "dock" }],
+    "commands": [{ "id": "open", "title": "Fill the Form from a CSV", "panel": "main" }]
+  },
+  "homepage": "https://formai.studio/extensions/#mail-merge"
+}
