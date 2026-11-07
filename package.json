@@ -1,0 +1,15 @@
+{
+  "name": "formext-formtray-focus-timer",
+  "version": "0.1.0",
+  "private": true,
+  "license": "Apache-2.0",
+  "description": "Focus Timer, a FormTray extension: a Widgets board tile with focus and break sessions, a per-day session log, a weekly chart, an optional chime and a toast when a session ends.",
+  "scripts": {
+    "build": "tsc --noEmit -p . && esbuild src/main.ts --bundle --format=esm --target=es2022 --minify --legal-comments=none --outfile=package/ui/focus.js",
+    "package": "python3 tools/formpkg.py build package -o dist"
+  },
+  "devDependencies": {
+    "esbuild": "0.25.10",
+    "typescript": "5.9.3"
+  }
+}
