@@ -1,0 +1,25 @@
+{
+  "format": "formai-package",
+  "format_version": 1,
+  "id": "citations",
+  "name": "Citations",
+  "product": "formmd",
+  "kind": "script-plugin",
+  "version": "0.1.0",
+  "author": "nodemode",
+  "licence": "Apache-2.0",
+  "native": false,
+  "permissions": ["document", "files-read"],
+  "minimum_app": "0.50.0",
+  "api": "1",
+  "description": "Imports a BibTeX or CSL-JSON reference library, inserts citation keys such as [@smith2020, p. 12] at the cursor, shows every citation in the page with its in-text form, and builds or updates an APA, Chicago author-date or IEEE bibliography at the end of the page as one undo step.",
+  "entry": { "ui": "ui/index.html" },
+  "contributes": {
+    "panels": [{ "id": "main", "title": "Citations", "location": "dock" }],
+    "commands": [
+      { "id": "open", "title": "Cite from Library", "panel": "main" },
+      { "id": "update-bibliography", "title": "Update Bibliography" }
+    ]
+  },
+  "homepage": "https://formai.studio/extensions/#citations"
+}
