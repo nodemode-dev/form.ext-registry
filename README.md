@@ -17,7 +17,7 @@ Citations stay plain text in the page, so they survive export, Copy as Markdown 
 ## Install
 
 1. Open FormPortal and go to Extensions, or choose Extensions, Manage in FormPortal in Form.md.
-2. Find Citations for Form.md and choose Install, or choose Install from File and pick `citations-0.1.0.formpkg`.
+2. Find Citations for Form.md and choose Install, or choose Install from File and pick `citations-0.1.1.formpkg`.
 3. In Form.md open the Extensions panel (Extensions item in the sidebar foot), find Citations and choose Open. Form.md asks once for the permissions below.
 
 ## Permissions
@@ -38,7 +38,7 @@ npm run package
 python3 tools/formpkg.py validate package
 ```
 
-`npm run build` type-checks `src/` and bundles it into `package/ui/citations.js`. `npm run package` writes the deterministic `dist/citations-0.1.0.formpkg` and prints its SHA-256. To try a working copy, make a project in form.ext and use Run in App, or list the `package/` folder in `extensions/formmd/dev.json` under the FormPortal root.
+`npm run build` type-checks `src/` and bundles it into `package/ui/citations.js`. `npm run package` writes the deterministic `dist/citations-0.1.1.formpkg` and prints its SHA-256. To try a working copy, make a project in form.ext and use Run in App, or list the `package/` folder in `extensions/formmd/dev.json` under the FormPortal root.
 
 ## Licence
 

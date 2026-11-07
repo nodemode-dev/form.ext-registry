@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.1 (2026-11-07)
+
+- The kit's current packager, which refuses packages without `api: "1"` or with `native: true`. The panel and commands are unchanged; checked in the real Form.md 0.50.0 window: inline citations at the cursor, Update replacing the previous list in one undo step, and the bibliography's italics, links and `[1]` labels.
+- Package: `citations-0.1.1.formpkg`, 18424 bytes, SHA-256 `ab11d2dcabda8ce3695e3f7c52ad3d93562fe73ef5ed17aa295d5be5a769c1bf`.
+
 ## 0.1.0 (2026-11-07)
 
 - First release for Form.md 0.50.0 (Form Extension Contract, API 1).
