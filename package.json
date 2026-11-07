@@ -1,0 +1,16 @@
+{
+  "name": "formext-formencoder-scrub-thumbnails",
+  "version": "0.1.0",
+  "private": true,
+  "license": "Apache-2.0",
+  "description": "Scrub Thumbnails, a FormEncoder extension: thumbnail sprite sheets and a WebVTT thumbnails track for web player hover previews, with a hover-preview test player.",
+  "scripts": {
+    "check": "tsc --noEmit -p .",
+    "build": "tsc --noEmit -p . && esbuild src/main.ts --bundle --format=esm --target=es2020 --minify --legal-comments=none --outfile=package/ui/scrub-thumbnails.js && esbuild src/scrub-thumbnails.css --minify --outfile=package/ui/scrub-thumbnails.css",
+    "package": "python3 tools/formpkg.py build package -o dist"
+  },
+  "devDependencies": {
+    "esbuild": "0.25.12",
+    "typescript": "5.9.3"
+  }
+}
