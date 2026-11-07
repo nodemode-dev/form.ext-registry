@@ -1,0 +1,15 @@
+{
+  "name": "formext-formmcp-tool-diff",
+  "version": "0.1.0",
+  "private": true,
+  "license": "Apache-2.0",
+  "description": "Tool Diff, a formMCP extension: snapshot an app's tool list, compare two snapshots, see added, removed and changed tools and arguments with breaking changes flagged.",
+  "scripts": {
+    "build": "tsc --noEmit -p . && esbuild src/main.ts --bundle --format=esm --target=es2022 --minify --legal-comments=none --outfile=package/ui/tool-diff.js",
+    "package": "python3 tools/formpkg.py build package -o dist"
+  },
+  "devDependencies": {
+    "esbuild": "0.25.10",
+    "typescript": "5.9.3"
+  }
+}
