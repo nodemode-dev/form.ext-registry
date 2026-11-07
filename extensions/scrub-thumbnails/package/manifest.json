@@ -1,0 +1,22 @@
+{
+  "format": "formai-package",
+  "format_version": 1,
+  "id": "scrub-thumbnails",
+  "name": "Scrub Thumbnails",
+  "product": "formencoder",
+  "kind": "script-plugin",
+  "version": "0.1.0",
+  "author": "nodemode",
+  "licence": "Apache-2.0",
+  "native": false,
+  "permissions": ["files-read", "files-write"],
+  "minimum_app": "0.7.0",
+  "api": "1",
+  "description": "Makes the hover previews web players show over a seek bar: from a video you pick, thumbnail sprite sheets at the interval, size and columns you set, and a WebVTT thumbnails track that points into them, with a test player to try the previews before you save.",
+  "entry": { "ui": "ui/index.html" },
+  "contributes": {
+    "panels": [{ "id": "main", "title": "Scrub Thumbnails", "location": "dock" }],
+    "commands": [{ "id": "open", "title": "Make Scrub Thumbnails", "panel": "main" }]
+  },
+  "homepage": "https://formai.studio/extensions/#scrub-thumbnails"
+}
