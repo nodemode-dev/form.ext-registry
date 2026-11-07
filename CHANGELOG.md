@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.1 (2026-11-07)
+
+- Check 5 (permissions) skips the Form Extension SDK build an extension ships unchanged as `ui/formext.js`, listed by
+  SHA-256 in `tools/sdk_builds.txt`, so a form.ext starter with no `src/` is judged by its own calls. Code bans still
+  read that file.
+
 ## 0.1.0 (2026-11-07)
 
 - The registry: `extensions/<id>/` per extension, `registry/blocklist.json`, `registry/publishers.json`, the Form
