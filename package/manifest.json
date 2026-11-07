@@ -1,0 +1,26 @@
+{
+  "format": "formai-package",
+  "format_version": 1,
+  "id": "podcast-chapters",
+  "name": "Podcast Chapters",
+  "product": "formwav",
+  "kind": "script-plugin",
+  "version": "0.1.0",
+  "author": "nodemode",
+  "licence": "Apache-2.0",
+  "native": false,
+  "permissions": ["document", "files-read", "files-write"],
+  "minimum_app": "2.24.0",
+  "api": "1",
+  "description": "Turns the session's markers and regions into podcast chapters with titles, links and images, and saves them as a Podcasting 2.0 chapters file or writes them into an MP3's ID3 tag as CHAP and CTOC frames.",
+  "entry": { "ui": "ui/index.html" },
+  "contributes": {
+    "panels": [{ "id": "main", "title": "Chapters", "location": "dock" }],
+    "commands": [
+      { "id": "edit", "title": "Edit Chapters", "panel": "main" },
+      { "id": "save-json", "title": "Save Chapters JSON" },
+      { "id": "tag-mp3", "title": "Write Chapters into an MP3" }
+    ]
+  },
+  "homepage": "https://formai.studio/extensions/#podcast-chapters"
+}

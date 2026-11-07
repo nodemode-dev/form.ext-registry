@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Podcast Chapters</title>
+    <link rel="stylesheet" href="chapters.css" />
+  </head>
+  <body>
+    <main class="pc" data-busy="false">
+      <header class="pc-head">
+        <div class="pc-head-text">
+          <h1 class="pc-title">Chapters</h1>
+          <p class="pc-summary" data-summary>Reading the session</p>
+        </div>
+        <button type="button" class="pc-btn pc-btn-icon" data-act="add" title="Add a chapter at the playhead" aria-label="Add a chapter at the playhead">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3v10M3 8h10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" /></svg>
+        </button>
+      </header>
+      <section class="pc-episode" aria-label="Episode">
+        <label class="pc-field"><span>Episode</span><input type="text" data-episode="title" placeholder="Episode title" autocomplete="off" spellcheck="true" /></label>
+        <label class="pc-field"><span>Podcast</span><input type="text" data-episode="podcastName" placeholder="Podcast name" autocomplete="off" spellcheck="true" /></label>
+      </section>
+      <section class="pc-body">
+        <ol class="pc-list" data-list translate="no"></ol>
+        <p class="pc-empty" data-empty>No chapters yet. Every marker and region in the session is a chapter: add one at the playhead, or import a chapters file or an MP3 that has chapters.</p>
+        <ul class="pc-problems" data-problems></ul>
+      </section>
+      <footer class="pc-foot">
+        <div class="pc-actions">
+          <button type="button" class="pc-btn pc-btn-primary" data-act="save-json" title="Save the chapters as a Podcasting 2.0 chapters file">
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2.5v7.5M4.8 7 8 10.2 11.2 7M3 12.5h10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /></svg>
+            <span>Save JSON</span>
+          </button>
+          <button type="button" class="pc-btn pc-btn-primary" data-act="tag-mp3" title="Choose an MP3 of this episode and save a copy with the chapters in its ID3 tag">
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 11.5V3.5l7-1.5v8" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" /><circle cx="4.5" cy="11.5" r="1.8" fill="none" stroke="currentColor" stroke-width="1.5" /><circle cx="11.5" cy="10" r="1.8" fill="none" stroke="currentColor" stroke-width="1.5" /></svg>
+            <span>Write into MP3</span>
+          </button>
+          <button type="button" class="pc-btn" data-act="import-json" title="Add chapters from a Podcasting 2.0 chapters file as markers">
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 10V2.5M4.8 5.7 8 2.5l3.2 3.2M3 12.5h10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /></svg>
+            <span>Import JSON</span>
+          </button>
+          <button type="button" class="pc-btn" data-act="import-mp3" title="Add the chapters an MP3's ID3 tag carries as markers">
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 10V2.5M4.8 5.7 8 2.5l3.2 3.2M3 12.5h10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /></svg>
+            <span>Read MP3</span>
+          </button>
+        </div>
+        <div class="pc-progress" data-progress aria-hidden="true">
+          <span class="pc-progress-label" data-progress-label>Working</span>
+          <span class="pc-bar"><span class="pc-bar-fill" data-progress-fill></span></span>
+          <button type="button" class="pc-btn pc-btn-small" data-act="cancel">Cancel</button>
+        </div>
+        <p class="pc-status" data-status role="status" aria-live="polite"></p>
+      </footer>
+    </main>
+    <template data-row>
+      <li class="pc-row">
+        <div class="pc-row-head">
+          <span class="pc-num" data-f="num"></span>
+          <input class="pc-time" type="text" data-f="start" aria-label="Start time" inputmode="decimal" autocomplete="off" />
+          <span class="pc-end" data-f="end"></span>
+          <button type="button" class="pc-btn pc-btn-icon pc-btn-ghost" data-f="toc" aria-pressed="true" title="Shown in the table of contents" aria-label="Shown in the table of contents">
+            <svg class="pc-eye" viewBox="0 0 16 16" aria-hidden="true"><path d="M1.5 8S4 3.5 8 3.5 14.5 8 14.5 8 12 12.5 8 12.5 1.5 8 1.5 8Z" fill="none" stroke="currentColor" stroke-width="1.4" /><circle cx="8" cy="8" r="2" fill="none" stroke="currentColor" stroke-width="1.4" /></svg>
+            <svg class="pc-eye-off" viewBox="0 0 16 16" aria-hidden="true"><path d="M1.5 8S4 3.5 8 3.5 14.5 8 14.5 8 12 12.5 8 12.5 1.5 8 1.5 8Z" fill="none" stroke="currentColor" stroke-width="1.4" /><path d="M2.5 13.5 13.5 2.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" /></svg>
+          </button>
+          <button type="button" class="pc-btn pc-btn-icon pc-btn-ghost" data-f="remove" title="Remove this chapter's marker" aria-label="Remove chapter">
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" /></svg>
+          </button>
+        </div>
+        <input class="pc-input pc-row-title" type="text" data-f="title" placeholder="Chapter title" aria-label="Chapter title" autocomplete="off" />
+        <div class="pc-row-links">
+          <button type="button" class="pc-thumb" data-f="image" title="Embed an image in the MP3 for this chapter" aria-label="Embed an image">
+            <svg viewBox="0 0 16 16" aria-hidden="true"><rect x="2" y="3" width="12" height="10" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.3" /><circle cx="6" cy="6.5" r="1.2" fill="currentColor" /><path d="M2.5 12 6.5 8.5l2.5 2 2-1.5 2.5 2.5" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" /></svg>
+            <img alt="" data-f="thumb" />
+          </button>
+          <input class="pc-input" type="url" data-f="url" placeholder="Link https://" aria-label="Chapter link" autocomplete="off" spellcheck="false" />
+          <input class="pc-input" type="url" data-f="img" placeholder="Image link https://" aria-label="Chapter image link" autocomplete="off" spellcheck="false" />
+        </div>
+      </li>
+    </template>
+    <script type="module" src="chapters.js"></script>
+  </body>
+</html>
