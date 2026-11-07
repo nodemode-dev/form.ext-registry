@@ -1,0 +1,15 @@
+{
+  "name": "formext-formvis-halftone-separations",
+  "version": "0.1.0",
+  "private": true,
+  "license": "Apache-2.0",
+  "description": "Halftone Separations, a FormVis extension: CMYK or spot-ink plates with per-plate screens, an overprint preview, plates as layers or PNG films.",
+  "scripts": {
+    "build": "tsc --noEmit -p . && esbuild src/main.ts --bundle --format=esm --target=es2022 --minify --legal-comments=none --outfile=package/ui/halftone.js",
+    "package": "python3 tools/formpkg.py build package -o dist"
+  },
+  "devDependencies": {
+    "esbuild": "0.25.10",
+    "typescript": "5.9.3"
+  }
+}
