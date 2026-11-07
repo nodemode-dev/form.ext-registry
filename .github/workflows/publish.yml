@@ -3,6 +3,7 @@ name: publish
 on:
   push:
     branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -15,23 +16,42 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
+      - name: Signing keys present
+        id: keys
+        env:
+          REGISTRY_SIGNING_KEY: ${{ secrets.REGISTRY_SIGNING_KEY }}
+          PUBLISHER_SIGNING_KEY: ${{ secrets.PUBLISHER_SIGNING_KEY }}
+        run: |
+          if [ -n "$REGISTRY_SIGNING_KEY" ] && [ -n "$PUBLISHER_SIGNING_KEY" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "::notice title=Nothing published::REGISTRY_SIGNING_KEY and PUBLISHER_SIGNING_KEY are not set yet, so no index or package is published. Add them as described in KEYS.md and run this workflow again."
+            echo "Nothing published: the signing keys are not set yet (KEYS.md)." >> "$GITHUB_STEP_SUMMARY"
+          fi
       - uses: actions/checkout@v4
+        if: steps.keys.outputs.ready == 'true'
         with:
           fetch-depth: 0
       - uses: actions/setup-python@v5
+        if: steps.keys.outputs.ready == 'true'
         with:
           python-version: "3.12"
       - uses: actions/setup-node@v4
+        if: steps.keys.outputs.ready == 'true'
         with:
           node-version: "22"
       - name: Install the tools' requirements
+        if: steps.keys.outputs.ready == 'true'
         run: pip install -r tools/requirements.txt
       - name: Build, sign and index every package
+        if: steps.keys.outputs.ready == 'true'
         env:
           REGISTRY_SIGNING_KEY: ${{ secrets.REGISTRY_SIGNING_KEY }}
           PUBLISHER_SIGNING_KEY: ${{ secrets.PUBLISHER_SIGNING_KEY }}
         run: python tools/build_index.py --require-keys
       - name: Release every version not released yet
+        if: steps.keys.outputs.ready == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -52,6 +72,7 @@ jobs:
               --latest=false
           done
       - name: Upload the signed index and block list
+        if: steps.keys.outputs.ready == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
