@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Handwriting Reveal</title>
+    <link rel="stylesheet" href="handwriting-reveal.css" />
+  </head>
+  <body>
+    <main class="hr">
+      <header class="hr-bar">
+        <svg class="hr-ico" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 17c2.5-5 4.5-9 6-9s-1.5 9 0 9 3-6 4.5-6-1 6 .5 6 2.5-3 4-3"/><path d="M15.5 4.5l3 3L11 15l-3.5.5.5-3.5z"/></svg>
+        <select class="hr-select hr-layer" id="layer" aria-label="Text layer"><option value="">No text layer</option></select>
+        <button class="hr-icon-btn" id="trace" type="button" title="Trace the letters again" aria-label="Trace the letters again" disabled><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/></svg></button>
+      </header>
+      <div class="hr-status" id="status" role="status" aria-live="polite">
+        <span class="hr-meter" aria-hidden="true"><span class="hr-meter-fill" id="meter"></span></span>
+        <span class="hr-status-text" id="status-text">Starting</span>
+        <button class="hr-link" id="cancel" type="button" disabled>Cancel</button>
+      </div>
+      <section class="hr-stage" aria-label="Preview">
+        <svg class="hr-preview" id="preview" viewBox="0 0 100 40" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Handwriting preview">
+          <defs><mask id="hr-mask" maskUnits="userSpaceOnUse" x="-100000" y="-100000" width="200000" height="200000"><g id="mask-strokes" class="hr-mask-strokes" fill="none" stroke="#ffffff" stroke-linecap="round" stroke-linejoin="round"></g></mask></defs>
+          <path id="ghost" class="hr-ghost" d="" />
+          <path id="revealed" class="hr-revealed" d="" mask="url(#hr-mask)" />
+          <g id="ink" class="hr-ink" fill="none" stroke-linecap="round" stroke-linejoin="round"></g>
+          <g id="guides" class="hr-guides"></g>
+        </svg>
+        <p class="hr-empty" id="empty">Choose a text layer and Trace to see how it will be written.</p>
+      </section>
+      <div class="hr-transport">
+        <button class="hr-icon-btn" id="play" type="button" title="Play the preview" aria-label="Play the preview" disabled><svg id="play-ico" viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg><svg id="pause-ico" viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true" hidden><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg></button>
+        <input class="hr-range" id="scrub" type="range" min="0" max="1000" value="1000" step="1" aria-label="Preview time" disabled />
+        <span class="hr-time" id="time">0.00 s</span>
+        <label class="hr-toggle" title="Show the traced centre lines and where each stroke starts"><input type="checkbox" id="show-guides" /> Lines</label>
+      </div>
+      <section class="hr-form" aria-label="Settings">
+        <div class="hr-row">
+          <span class="hr-label">Style</span>
+          <span class="hr-seg" role="radiogroup" aria-label="Style">
+            <button type="button" role="radio" data-mode="reveal" aria-checked="true" class="is-on">Reveal text</button>
+            <button type="button" role="radio" data-mode="ink" aria-checked="false">Ink strokes</button>
+          </span>
+        </div>
+        <label class="hr-row"><span class="hr-label">Duration</span><span class="hr-unit"><input class="hr-input" id="duration" type="number" min="0.2" max="600" step="0.1" value="3" /><span>s</span></span></label>
+        <label class="hr-row"><span class="hr-label">Start</span><select class="hr-select" id="start"><option value="now">At the current time</option><option value="in">At the layer's in point</option></select></label>
+        <label class="hr-row"><span class="hr-label">Pen lift</span><span class="hr-unit"><input class="hr-input" id="lift" type="number" min="0" max="5" step="0.01" value="0.06" /><span>s</span></span></label>
+        <label class="hr-row"><span class="hr-label">Between letters</span><span class="hr-unit"><input class="hr-input" id="gap" type="number" min="0" max="5" step="0.01" value="0.1" /><span>s</span></span></label>
+        <label class="hr-row"><span class="hr-label">Ease</span><span class="hr-unit"><input class="hr-input" id="ease" type="number" min="0" max="100" step="1" value="45" /><span>%</span></span></label>
+        <label class="hr-row hr-ink-row"><span class="hr-label">Ink colour</span><span class="hr-unit"><input class="hr-color" id="ink-colour" type="color" value="#ffffff" disabled /></span></label>
+        <label class="hr-row hr-ink-row"><span class="hr-label">Ink width</span><span class="hr-unit"><input class="hr-input" id="ink-width" type="number" min="0" max="500" step="0.5" value="0" disabled /><span>px, 0 follows the font</span></span></label>
+      </section>
+      <p class="hr-facts" id="facts">&nbsp;</p>
+      <div class="hr-actions">
+        <button class="hr-btn hr-btn-cta" id="write" type="button" disabled>Write On</button>
+      </div>
+    </main>
+    <script type="module" src="handwriting-reveal.js"></script>
+  </body>
+</html>

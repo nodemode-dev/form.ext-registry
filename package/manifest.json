@@ -1,0 +1,25 @@
+{
+  "format": "formai-package",
+  "format_version": 1,
+  "id": "handwriting-reveal",
+  "name": "Handwriting Reveal",
+  "product": "formvfx",
+  "kind": "script-plugin",
+  "version": "0.1.0",
+  "author": "nodemode",
+  "licence": "Apache-2.0",
+  "native": false,
+  "permissions": ["document"],
+  "minimum_app": "0.54.0",
+  "api": "1",
+  "description": "Writes a text layer on by hand: traces the centre line of every letter in its own font, orders the strokes the way a pen draws them, previews the writing, and adds animated strokes that reveal the real text through a track matte or draw it as ink. One undo step; change the duration, pen lifts and easing and write it again.",
+  "entry": { "ui": "ui/index.html" },
+  "contributes": {
+    "panels": [{ "id": "main", "title": "Handwriting Reveal", "location": "dock" }],
+    "commands": [
+      { "id": "show", "title": "Trace the Selected Text Layer", "panel": "main" },
+      { "id": "write-selected", "title": "Write On the Selected Text Layer" }
+    ]
+  },
+  "homepage": "https://formai.studio/extensions/#handwriting-reveal"
+}
