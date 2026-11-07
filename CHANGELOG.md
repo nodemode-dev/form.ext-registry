@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.1
+
+- Fixed: Tag Light Keywords on Selected Photos, run headless from the Extensions menu or by an agent, could answer "select photos first" with photos selected, because the panel's start-up read of the selection replaced the command's own.
+- The vendored `tools/formpkg.py` is the updated contract kit's copy.
+
 ## 0.1.0
 
 First release, for FormLit 0.50.0 (Form Extension Contract, API 1).

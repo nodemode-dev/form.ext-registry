@@ -1,6 +1,6 @@
 {
   "name": "formext-formlit-golden-hour",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "license": "Apache-2.0",
   "description": "Golden Hour, a FormLit extension: sun and moon, golden hour, blue hour and twilight at each geotagged photo's place and time, with a sun path and light keywords.",
