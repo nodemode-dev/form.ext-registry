@@ -479,7 +479,9 @@ async function runHeadless(a: Activation): Promise<void> {
       ? touched.length
         ? `Tool changes in ${touched.map((r) => r.app).join(", ")} since their last snapshot.`
         : `No tool changes in ${report.length} app${report.length === 1 ? "" : "s"} since their last snapshot.`
-      : "No snapshots yet. Run Snapshot Every App's Tools first.";
+      : args.app
+        ? `No snapshot of ${args.app} yet. Run Snapshot Every App's Tools first.`
+        : "No snapshots yet. Run Snapshot Every App's Tools first.";
     await formext.done({ summary: text, apps: report });
   } catch (e) {
     void formext.notify(`Tool Diff: ${plain(e)}`, "error").catch(() => undefined);

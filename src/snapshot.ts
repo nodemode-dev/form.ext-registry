@@ -38,7 +38,7 @@ export function fromRows(rows: ToolRows, source: "formmcp" | "now"): Snapshot | 
       .filter((t) => typeof t?.name === "string")
       .map((t) => ({ name: t.name, description: (t.description ?? "").slice(0, 240), readOnly: typeof t.read_only === "boolean" ? t.read_only : null, schema: null })),
   );
-  const taken = rows.loaded * 1000;
+  const taken = rows.loaded > 1e11 ? rows.loaded : rows.loaded * 1000;
   return { id: source === "now" ? "now" : newId(), app: rows.app, label: source === "now" ? `Now, formMCP's list from ${when(taken)}` : `Snapshot ${when(taken)}`, taken, source, server: serverText(rows.server), tools };
 }
 
@@ -96,6 +96,6 @@ export function parseImport(name: string, text: string, apps: string[], fallback
   if (!app) app = apps.find((id) => server.toLowerCase().startsWith(id)) ?? "";
   const guessed = !app;
   if (!app) app = fallbackApp;
-  const taken = typeof r?.loaded === "number" ? r.loaded * 1000 : Date.now();
+  const taken = typeof r?.loaded === "number" ? (r.loaded > 1e11 ? r.loaded : r.loaded * 1000) : Date.now();
   return { snapshots: [{ id: newId(), app, label: `${name}${server ? `, ${server}` : ""}`, taken, source: "file", server, tools }], guessedApp: guessed };
 }
