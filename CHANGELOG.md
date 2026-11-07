@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.1 (2026-11-07)
+
+- Package `tool-diff-0.1.1.formpkg`, 14925 bytes, SHA-256 `bf4d0a4eabff933c6e464535b3cb0fba4794aa1118ef123d3a0df6baf93979d7`. Same panel and commands as 0.1.0.
+- `tools/formpkg.py` is the kit's current packager (it refuses a missing `api` and `native: true`).
+- The README says how formMCP saves a report: it confirms the name and saves into Downloads.
+
 ## 0.1.0 (2026-11-07)
 
 - First release for formMCP 0.9.0 (Form Extension Contract, API 1). Package `tool-diff-0.1.0.formpkg`, 14924 bytes, SHA-256 `32f15ed5a1e302e780070775beec22c54a945288dde05eea2e94071637956325`.

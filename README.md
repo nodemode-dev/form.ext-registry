@@ -40,7 +40,7 @@ No network access. Snapshots stay in formMCP's storage for this extension (at mo
 ```sh
 npm install
 npm run build      # type-check and bundle src/ into package/ui/tool-diff.js
-npm run package    # dist/tool-diff-0.1.0.formpkg, deterministic
+npm run package    # dist/tool-diff-0.1.1.formpkg, deterministic
 python3 tools/formpkg.py validate package
 ```
 
