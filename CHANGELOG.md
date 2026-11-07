@@ -2,7 +2,7 @@
 
 ## 0.1.0 (2026-11-07)
 
-- First release for formMCP 0.9.0 (Form Extension Contract, API 1).
+- First release for formMCP 0.9.0 (Form Extension Contract, API 1). Package `tool-diff-0.1.0.formpkg`, 14924 bytes, SHA-256 `32f15ed5a1e302e780070775beec22c54a945288dde05eea2e94071637956325`.
 - Snapshot: keeps formMCP's current tool list of a Form app (names, descriptions, read-only marks), up to eight per app in the extension's storage; an unchanged list is not stored twice.
 - Load from App: starts the app once through formMCP's `tool_load` so its list is current, with progress and Stop.
 - Import: a saved MCP `tools/list` answer (whole JSON-RPC answer, its `result`, or a bare array), a formMCP tool list file, or a Tool Diff report. Imported lists carry argument schemas, so arguments are compared too.
