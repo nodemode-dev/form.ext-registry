@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Focus Timer</title>
+    <link rel="stylesheet" href="tokens.css" />
+    <link rel="stylesheet" href="focus.css" />
+  </head>
+  <body>
+    <main class="ft" id="ft" data-phase="focus" data-status="idle">
+      <section class="ft-top">
+        <button class="ft-ring" id="ring" type="button" aria-label="Start focus">
+          <svg class="ft-dial" viewBox="0 0 100 100" aria-hidden="true">
+            <circle class="ft-track" cx="50" cy="50" r="44" />
+            <circle class="ft-prog" id="prog" cx="50" cy="50" r="44" pathLength="1000" />
+          </svg>
+          <span class="ft-read">
+            <span class="ft-time" id="time">25:00</span>
+            <span class="ft-mini" id="mini">Focus</span>
+          </span>
+        </button>
+        <div class="ft-side">
+          <div class="ft-phase">
+            <span id="phase">Focus</span><span class="ft-count" id="count">1 of 4</span>
+            <button class="btn btn-icon ft-gear" id="gear" type="button" aria-label="Focus Timer settings" title="Settings">
+              <svg class="i" viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 4.5h6M11.5 4.5h2M2.5 11.5h2M7.5 11.5h6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" /><circle cx="10" cy="4.5" r="1.6" fill="none" stroke="currentColor" stroke-width="1.5" /><circle cx="6" cy="11.5" r="1.6" fill="none" stroke="currentColor" stroke-width="1.5" /></svg>
+            </button>
+          </div>
+          <input class="ft-note" id="note" type="text" maxlength="80" spellcheck="false" autocomplete="off" placeholder="What are you working on?" aria-label="What are you working on?" />
+          <div class="ft-ctl">
+            <button class="btn btn-primary ft-go" id="go" type="button">
+              <svg class="i i-play" viewBox="0 0 16 16" aria-hidden="true"><path d="M5 3.2v9.6a.6.6 0 0 0 .9.5l7.4-4.8a.6.6 0 0 0 0-1L5.9 2.7a.6.6 0 0 0-.9.5Z" fill="currentColor" /></svg>
+              <svg class="i i-pause" viewBox="0 0 16 16" aria-hidden="true"><rect x="4" y="3" width="2.6" height="10" rx=".8" fill="currentColor" /><rect x="9.4" y="3" width="2.6" height="10" rx=".8" fill="currentColor" /></svg>
+              <span id="goText">Start</span>
+            </button>
+            <button class="btn btn-icon ft-reset" id="reset" type="button" aria-label="Reset this session" title="Reset this session">
+              <svg class="i" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8a4.5 4.5 0 1 0 1.4-3.3M3.5 2.5v2.6h2.6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /></svg>
+            </button>
+            <button class="btn btn-icon ft-skip" id="skip" type="button" aria-label="Skip to the next session" title="Skip to the next session">
+              <svg class="i" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 3.6v8.8a.5.5 0 0 0 .8.4l6-4.4a.5.5 0 0 0 0-.8l-6-4.4a.5.5 0 0 0-.8.4Z" fill="currentColor" /><rect x="11" y="3" width="1.8" height="10" rx=".6" fill="currentColor" /></svg>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section class="ft-week" aria-label="Focus minutes, last seven days">
+        <p class="ft-sum"><span id="sum">Today, 0 min</span><span class="ft-goal" id="goal">goal 120 min</span></p>
+        <div class="ft-bars" id="bars">
+          <button class="ft-day" type="button"><span class="ft-bar"><span class="ft-fill"></span></span><span class="ft-dl">M</span></button>
+          <button class="ft-day" type="button"><span class="ft-bar"><span class="ft-fill"></span></span><span class="ft-dl">T</span></button>
+          <button class="ft-day" type="button"><span class="ft-bar"><span class="ft-fill"></span></span><span class="ft-dl">W</span></button>
+          <button class="ft-day" type="button"><span class="ft-bar"><span class="ft-fill"></span></span><span class="ft-dl">T</span></button>
+          <button class="ft-day" type="button"><span class="ft-bar"><span class="ft-fill"></span></span><span class="ft-dl">F</span></button>
+          <button class="ft-day" type="button"><span class="ft-bar"><span class="ft-fill"></span></span><span class="ft-dl">S</span></button>
+          <button class="ft-day is-today" type="button"><span class="ft-bar"><span class="ft-fill"></span></span><span class="ft-dl">S</span></button>
+          <span class="ft-line" id="line"></span>
+        </div>
+      </section>
+
+      <section class="ft-sheet" id="daySheet" hidden aria-label="Sessions of the day">
+        <header class="ft-head">
+          <button class="btn btn-icon" id="dayBack" type="button" aria-label="Back to the timer" title="Back">
+            <svg class="i" viewBox="0 0 16 16" aria-hidden="true"><path d="M10 3.5 5.5 8l4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" /></svg>
+          </button>
+          <h2 class="ft-title" id="dayTitle">Today</h2>
+          <span class="ft-head-meta" id="dayMeta"></span>
+        </header>
+        <ol class="ft-list" id="dayList"></ol>
+        <p class="ft-empty" id="dayEmpty">No sessions on this day.</p>
+      </section>
+
+      <section class="ft-sheet" id="setSheet" hidden aria-label="Settings">
+        <header class="ft-head">
+          <button class="btn btn-icon" id="setBack" type="button" aria-label="Back to the timer" title="Back">
+            <svg class="i" viewBox="0 0 16 16" aria-hidden="true"><path d="M10 3.5 5.5 8l4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" /></svg>
+          </button>
+          <h2 class="ft-title">Settings</h2>
+        </header>
+        <div class="ft-form">
+          <label class="ft-field"><span>Focus</span><input id="sFocus" type="number" min="1" max="180" step="1" value="25" /><em>min</em></label>
+          <label class="ft-field"><span>Short break</span><input id="sShort" type="number" min="1" max="60" step="1" value="5" /><em>min</em></label>
+          <label class="ft-field"><span>Long break</span><input id="sLong" type="number" min="1" max="90" step="1" value="15" /><em>min</em></label>
+          <label class="ft-field"><span>Long break after</span><input id="sEvery" type="number" min="1" max="12" step="1" value="4" /><em>focus</em></label>
+          <label class="ft-field"><span>Daily goal</span><input id="sGoal" type="number" min="0" max="720" step="5" value="120" /><em>min</em></label>
+          <label class="ft-check"><input id="sChime" type="checkbox" checked /><span>Chime when a session ends</span></label>
+          <label class="ft-check"><input id="sAuto" type="checkbox" /><span>Start the next session on its own</span></label>
+          <div class="ft-row">
+            <button class="btn" id="sTest" type="button">Play chime</button>
+            <button class="btn btn-danger" id="sClear" type="button">Clear log</button>
+          </div>
+        </div>
+      </section>
+
+      <p class="ft-msg" id="msg" role="status" hidden></p>
+    </main>
+    <script type="module" src="focus.js"></script>
+  </body>
+</html>
