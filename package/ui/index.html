@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Shot List</title>
+    <style>
+      :root {
+        --bg: #0a0a0a;
+        --panel: #111111;
+        --text: #f7f7f7;
+        --muted: #adadb0;
+        --accent: #f97316;
+        --border: rgb(255 255 255 / 0.1);
+        --radius: 6px;
+        --sl-control: var(--control, color-mix(in srgb, var(--panel) 82%, var(--text) 10%));
+        --sl-control-hover: var(--control-hover, color-mix(in srgb, var(--panel) 74%, var(--text) 16%));
+        --sl-faint: var(--ink-faint, color-mix(in srgb, var(--muted) 78%, var(--panel)));
+        --sl-inset: var(--inset, color-mix(in srgb, var(--panel) 80%, black));
+        --sl-on-accent: var(--accent-text, color-mix(in srgb, var(--accent) 18%, black));
+        --sl-accent-wash: color-mix(in srgb, var(--accent) 16%, transparent);
+        --sl-fault: var(--danger, #ff475a);
+        --sl-paper: #ffffff;
+        --sl-shadow: 0 1px 6px rgb(0 0 0 / 0.35);
+        --sl-font: var(--font-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "Segoe UI", system-ui, sans-serif);
+        --sl-mono: var(--font-mono, ui-monospace, "SF Mono", Menlo, "JetBrains Mono", monospace);
+        color-scheme: dark;
+      }
+      :root[data-theme="light"] { color-scheme: light; --sl-inset: var(--inset, color-mix(in srgb, var(--panel) 94%, black)); --sl-shadow: 0 1px 4px rgb(0 0 0 / 0.18); }
+      * { box-sizing: border-box; }
+      [hidden] { display: none !important; }
+      html, body { margin: 0; height: 100%; background: var(--panel); color: var(--text); font: 12px/1.4 var(--sl-font); -webkit-font-smoothing: antialiased; }
+      button, select, textarea { font: inherit; color: inherit; }
+      .sl { display: flex; flex-direction: column; height: 100%; min-height: 320px; }
+      .sl-head { display: flex; align-items: center; gap: 8px; padding: 8px 10px 6px; border-bottom: 1px solid var(--border); }
+      .sl-heading { flex: 1; min-width: 0; display: flex; flex-direction: column; line-height: 1.3; }
+      .sl-name { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .sl-count { color: var(--sl-faint); font-size: 11px; white-space: nowrap; }
+      .seg { display: inline-flex; background: var(--sl-inset); border-radius: var(--radius); padding: 2px; }
+      .seg-btn { border: 0; background: none; padding: 3px 10px; border-radius: calc(var(--radius) - 2px); color: var(--muted); cursor: pointer; }
+      .seg-btn.is-on { background: var(--sl-control); color: var(--text); }
+      .iconbtn { display: inline-grid; place-items: center; width: 24px; height: 24px; border: 0; border-radius: var(--radius); background: none; color: var(--muted); cursor: pointer; }
+      .iconbtn:hover { background: var(--sl-control); color: var(--text); }
+      .iconbtn[disabled] { opacity: 0.4; cursor: default; }
+      .sl-bar, .sl-opts, .sl-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+      .sl-bar { padding: 8px 10px 4px; }
+      .field { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); }
+      select { appearance: none; background: var(--sl-control) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='m2 3.5 3 3 3-3' fill='none' stroke='%23999' stroke-width='1.3'/%3E%3C/svg%3E") no-repeat right 6px center / 10px; border: 0; border-radius: var(--radius); padding: 4px 22px 4px 8px; color: var(--text); cursor: pointer; max-width: 160px; }
+      select:hover { background-color: var(--sl-control-hover); }
+      .chip { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border: 0; border-radius: var(--radius); background: var(--sl-control); color: var(--text); cursor: pointer; white-space: nowrap; }
+      .chip:hover { background: var(--sl-control-hover); }
+      .chip[disabled] { opacity: 0.45; cursor: default; }
+      .chip-primary { background: var(--accent); color: var(--sl-on-accent); font-weight: 600; }
+      .chip-primary:hover { background: color-mix(in srgb, var(--accent) 86%, white); }
+      .chip-quiet { background: none; color: var(--muted); padding: 2px 8px; }
+      .sl-status { display: grid; grid-template-columns: 1fr 72px auto; align-items: center; gap: 8px; height: 26px; padding: 0 10px; color: var(--sl-faint); }
+      .sl-status-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .sl-status[data-state="error"] .sl-status-text { color: var(--sl-fault); }
+      .meter { height: 4px; border-radius: 2px; background: var(--sl-inset); overflow: hidden; visibility: hidden; }
+      .meter-fill { display: block; height: 100%; width: 0; background: var(--accent); transition: width 120ms linear; }
+      .sl-status [data-ref="cancel"] { visibility: hidden; }
+      .sl-status[data-state="busy"] .meter, .sl-status[data-state="busy"] [data-ref="cancel"] { visibility: visible; }
+      .sl-list { flex: 1; min-height: 0; overflow: auto; padding: 2px 6px 8px; }
+      .sl-empty { margin: 24px 8px; color: var(--sl-faint); text-align: center; }
+      .shot { display: grid; grid-template-columns: 112px 1fr; gap: 10px; padding: 6px 4px; border-radius: var(--radius); border: 1px solid transparent; }
+      .shot + .shot { margin-top: 2px; }
+      .shot:hover { background: color-mix(in srgb, var(--sl-control) 50%, transparent); }
+      .shot.is-selected { border-color: color-mix(in srgb, var(--accent) 55%, transparent); background: var(--sl-accent-wash); }
+      .thumb { position: relative; aspect-ratio: 16 / 9; border-radius: calc(var(--radius) - 2px); overflow: hidden; background: var(--sl-inset); align-self: start; cursor: pointer; }
+      .thumb canvas { display: block; width: 100%; height: 100%; }
+      .thumb-label { position: absolute; inset: 0; display: grid; place-items: center; color: var(--sl-faint); font-size: 11px; text-transform: capitalize; pointer-events: none; }
+      .thumb.has-frame .thumb-label { display: none; }
+      .meta { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+      .l1 { display: flex; align-items: baseline; gap: 6px; min-width: 0; }
+      .num { color: var(--accent); font-variant-numeric: tabular-nums; }
+      .name { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 600; }
+      .dur { color: var(--muted); font: 11px var(--sl-mono); }
+      .l2 { display: flex; gap: 8px; color: var(--sl-faint); font: 11px var(--sl-mono); white-space: nowrap; overflow: hidden; }
+      .trk { overflow: hidden; text-overflow: ellipsis; font-family: var(--sl-font); }
+      .note { margin-top: 3px; width: 100%; min-height: 36px; resize: vertical; border: 1px solid var(--border); border-radius: calc(var(--radius) - 2px); background: var(--sl-inset); padding: 4px 6px; color: var(--text); line-height: 1.35; }
+      .note:focus { outline: none; border-color: color-mix(in srgb, var(--accent) 60%, transparent); }
+      .note::placeholder { color: var(--sl-faint); }
+      .sl-sheet { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 6px; padding: 6px 10px 8px; }
+      .sheet-frame { flex: 1; min-height: 0; overflow: auto; background: var(--sl-inset); border-radius: var(--radius); padding: 10px; display: flex; align-items: flex-start; justify-content: center; }
+      .sheet-frame canvas { display: block; width: 100%; height: auto; background: var(--sl-paper); box-shadow: var(--sl-shadow); }
+      .pager { display: flex; align-items: center; justify-content: center; gap: 8px; color: var(--muted); font-variant-numeric: tabular-nums; }
+      .sl-foot { display: flex; flex-direction: column; gap: 8px; padding: 8px 10px 10px; border-top: 1px solid var(--border); }
+      .spacer { flex: 1; }
+    </style>
+  </head>
+  <body>
+    <main class="sl">
+      <header class="sl-head">
+        <div class="sl-heading">
+          <span class="sl-name" data-ref="timeline">Shot List</span>
+          <span class="sl-count" data-ref="count">&nbsp;</span>
+        </div>
+        <div class="seg" role="tablist" aria-label="View">
+          <button type="button" role="tab" class="seg-btn is-on" data-view="list" aria-selected="true">List</button>
+          <button type="button" role="tab" class="seg-btn" data-view="sheet" aria-selected="false">Sheet</button>
+        </div>
+        <button type="button" class="iconbtn" data-ref="refresh" title="Read the timeline again" aria-label="Read the timeline again">
+          <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M13 8a5 5 0 1 1-1.46-3.54M13 2.5V5h-2.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </header>
+
+      <section class="sl-bar">
+        <label class="field">
+          <span>Track</span>
+          <select data-ref="track"><option value="all">All picture tracks</option></select>
+        </label>
+        <label class="field">
+          <span>Frame</span>
+          <select data-ref="position">
+            <option value="first">First</option>
+            <option value="middle">Middle</option>
+            <option value="last">Last</option>
+          </select>
+        </label>
+        <button type="button" class="chip" data-ref="add-files" title="Pick the clips' source files so frames can be taken from them">
+          <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><rect x="2" y="3.5" width="12" height="9" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M6.5 6.2v3.6L9.7 8z" fill="currentColor"/></svg>
+          <span>Add source files</span>
+        </button>
+      </section>
+
+      <div class="sl-status" data-state="idle">
+        <span class="sl-status-text" data-ref="status">&nbsp;</span>
+        <span class="meter" aria-hidden="true"><span class="meter-fill" data-ref="meter"></span></span>
+        <button type="button" class="chip chip-quiet" data-ref="cancel">Cancel</button>
+      </div>
+
+      <section class="sl-list" data-ref="list" role="list">
+        <p class="sl-empty" data-ref="empty">Reading the timeline&hellip;</p>
+      </section>
+
+      <section class="sl-sheet" data-ref="sheet" hidden>
+        <div class="sheet-frame"><canvas data-ref="preview" width="842" height="595"></canvas></div>
+        <div class="pager">
+          <button type="button" class="iconbtn" data-ref="prev" aria-label="Previous page">
+            <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M10 3.5 5.5 8l4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <span data-ref="page">Page 1 of 1</span>
+          <button type="button" class="iconbtn" data-ref="next" aria-label="Next page">
+            <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="m6 3.5 4.5 4.5L6 12.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+      </section>
+
+      <footer class="sl-foot">
+        <div class="sl-opts">
+          <label class="field">
+            <span>Paper</span>
+            <select data-ref="paper">
+              <option value="a4-landscape">A4 landscape</option>
+              <option value="a4-portrait">A4 portrait</option>
+              <option value="letter-landscape">Letter landscape</option>
+              <option value="letter-portrait">Letter portrait</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>Columns</span>
+            <select data-ref="columns">
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>Note lines</span>
+            <select data-ref="lines">
+              <option value="0">0</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+            </select>
+          </label>
+        </div>
+        <div class="sl-actions">
+          <button type="button" class="chip" data-ref="markers" title="Add a timeline marker carrying each shot's note, as one undo step">
+            <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M4.5 2.5h7v8L8 13.5l-3.5-3z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+            <span>Notes to markers</span>
+          </button>
+          <span class="spacer"></span>
+          <button type="button" class="chip" data-ref="save-png">Save PNG</button>
+          <button type="button" class="chip chip-primary" data-ref="save-pdf">
+            <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M8 2.5v7.5M4.8 7 8 10.2 11.2 7M3 13h10" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span>Save PDF</span>
+          </button>
+        </div>
+      </footer>
+    </main>
+
+    <template data-ref="row">
+      <article class="shot" role="listitem">
+        <div class="thumb" data-kind="video"><canvas width="224" height="126"></canvas><span class="thumb-label"></span></div>
+        <div class="meta">
+          <div class="l1"><b class="num"></b><span class="name"></span><span class="dur"></span></div>
+          <div class="l2"><span class="tc"></span><span class="trk"></span></div>
+          <textarea class="note" rows="2" placeholder="Notes for this shot" spellcheck="true"></textarea>
+        </div>
+      </article>
+    </template>
+    <script type="module" src="shot-list.js"></script>
+  </body>
+</html>
