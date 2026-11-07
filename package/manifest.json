@@ -1,0 +1,26 @@
+{
+  "format": "formai-package",
+  "format_version": 1,
+  "id": "focus-timer",
+  "name": "Focus Timer",
+  "product": "formtray",
+  "kind": "script-plugin",
+  "version": "0.1.0",
+  "author": "nodemode",
+  "licence": "Apache-2.0",
+  "native": false,
+  "permissions": [],
+  "minimum_app": "0.15.0",
+  "api": "1",
+  "description": "A Widgets board tile for focused work: run focus sessions and short and long breaks, add a note to what you are working on, see today's sessions and a seven-day chart of focus minutes against a daily goal, with an optional chime and a toast when a session ends. Sessions keep running when the tile reloads. Needs no permissions.",
+  "entry": { "ui": "ui/index.html" },
+  "contributes": {
+    "panels": [{ "id": "main", "title": "Focus", "location": "dock" }],
+    "commands": [
+      { "id": "toggle", "title": "Start or Pause", "panel": "main" },
+      { "id": "skip", "title": "Skip to Next Session", "panel": "main" },
+      { "id": "today", "title": "Show Today's Sessions", "panel": "main" }
+    ]
+  },
+  "homepage": "https://formai.studio/extensions/#focus-timer"
+}
