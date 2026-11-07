@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Trigger Tester</title>
+    <link rel="stylesheet" href="trigger.css" />
+  </head>
+  <body>
+    <main class="tt">
+      <header class="bar">
+        <svg class="mark" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="8" /><circle cx="12" cy="12" r="3.5" /><path d="M12 1.5v4M12 18.5v4M1.5 12h4M18.5 12h4" /></svg>
+        <h1>Trigger Tester</h1>
+        <div class="seg" role="group" aria-label="Skills that compete">
+          <button type="button" class="chip" data-scope="all" aria-pressed="true">All apps</button>
+          <button type="button" class="chip" data-scope="chosen" aria-pressed="false">Chosen app</button>
+          <button type="button" class="chip" data-scope="yours" aria-pressed="false">Your skills</button>
+        </div>
+        <label class="toggle" title="Rank your edited copies by the description in your copy instead of the released one">
+          <input id="copies" type="checkbox" checked />
+          <span class="box" aria-hidden="true"><svg viewBox="0 0 12 12" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 6.2l2.3 2.3 4.7-5" /></svg></span>
+          <span>Use my copies</span>
+        </label>
+        <span id="skill-count" class="count">&nbsp;</span>
+      </header>
+
+      <section class="prompts">
+        <div class="field-head">
+          <label for="prompt-text">Sample prompts</label>
+          <span class="hint">One per line. End a line with <code>=&gt; skill-name</code> to say which skill should win.</span>
+        </div>
+        <textarea id="prompt-text" rows="6" spellcheck="false" placeholder="export my picture as a CMYK TIFF => formvis-editing&#10;cut the silence out of a podcast episode&#10;make a slide deck from this outline"></textarea>
+        <div class="actions">
+          <button id="run" type="button" class="btn btn-primary" title="Run (Ctrl+Enter)">
+            <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true" fill="currentColor"><path d="M4.5 2.8v10.4L13 8z" /></svg>
+            <span>Run</span>
+          </button>
+          <button id="load" type="button" class="btn">Load prompts</button>
+          <button id="self" type="button" class="btn btn-quiet" title="Write one prompt per skill from the first sentence of its description, expecting that skill to win">Self-test</button>
+          <button id="cancel" type="button" class="btn btn-quiet" disabled>Cancel</button>
+          <div class="progress" aria-hidden="true"><i id="bar"></i></div>
+          <span id="prompt-count" class="count">0 prompts</span>
+        </div>
+      </section>
+
+      <section class="stats" aria-label="Summary">
+        <div class="stat"><b id="s-prompts">0</b><span>Prompts</span></div>
+        <div class="stat stat-clear"><b id="s-clear">0</b><span>Clear winner</span></div>
+        <div class="stat stat-contested"><b id="s-contested">0</b><span>Contested</span></div>
+        <div class="stat stat-none"><b id="s-none">0</b><span>Weak or none</span></div>
+        <div class="stat"><b id="s-expected">0 / 0</b><span>Expected won</span></div>
+      </section>
+
+      <nav class="tabs" role="tablist" aria-label="Results">
+        <button type="button" class="chip" role="tab" data-tab="prompts" aria-pressed="true">Prompts <span id="t-prompts" class="n">0</span></button>
+        <button type="button" class="chip" role="tab" data-tab="overlaps" aria-pressed="false">Overlaps <span id="t-overlaps" class="n">0</span></button>
+        <button type="button" class="chip" role="tab" data-tab="losers" aria-pressed="false">Never wins <span id="t-losers" class="n">0</span></button>
+        <button type="button" class="chip" role="tab" data-tab="try" aria-pressed="false">Try a description</button>
+      </nav>
+
+      <div class="views">
+        <section id="view-prompts" class="view" data-view="prompts">
+          <p id="empty-prompts" class="empty">Paste prompts above and press Run. Each one is ranked against every skill in scope by its name and description, the way an agent picks a skill.</p>
+          <ol id="prompt-list" class="list"></ol>
+        </section>
+        <section id="view-overlaps" class="view" data-view="overlaps" hidden>
+          <p id="empty-overlaps" class="empty">Pairs of skills whose descriptions read alike, or that come within 80% of each other on a prompt, are listed here.</p>
+          <ul id="pair-list" class="list"></ul>
+        </section>
+        <section id="view-losers" class="view" data-view="losers" hidden>
+          <p id="empty-losers" class="empty">Skills that win none of your prompts are listed here, with the words only they use.</p>
+          <ul id="loser-list" class="list"></ul>
+        </section>
+        <section id="view-try" class="view try" data-view="try" hidden>
+          <div class="try-head">
+            <label for="try-skill">Skill</label>
+            <select id="try-skill"><option value="">Choose a skill</option></select>
+            <span id="try-wins" class="count">&nbsp;</span>
+          </div>
+          <textarea id="try-text" rows="4" spellcheck="true" placeholder="Choose a skill, then rewrite its description and watch the ranks change." disabled></textarea>
+          <div class="actions">
+            <button id="try-save" type="button" class="btn btn-primary" disabled>Save to my copy</button>
+            <button id="try-reset" type="button" class="btn btn-quiet" disabled>Reset</button>
+            <span id="try-chars" class="count">0 / 1024</span>
+          </div>
+          <ol id="try-list" class="list"></ol>
+        </section>
+      </div>
+
+      <footer class="foot">
+        <span id="status" class="status" role="status">Starting.</span>
+        <button id="save-md" type="button" class="btn btn-small" disabled>
+          <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2.5v7.5M4.8 7l3.2 3.2L11.2 7M3 13.5h10" /></svg>
+          <span>Save report</span>
+        </button>
+        <button id="save-json" type="button" class="btn btn-small btn-quiet" disabled>JSON</button>
+      </footer>
+    </main>
+    <script type="module" src="trigger.js"></script>
+  </body>
+</html>

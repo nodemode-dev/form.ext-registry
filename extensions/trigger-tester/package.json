@@ -1,0 +1,15 @@
+{
+  "name": "formext-formskills-trigger-tester",
+  "version": "0.1.0",
+  "private": true,
+  "license": "Apache-2.0",
+  "description": "Trigger Tester, a FormSkills extension: ranks your skills against sample prompts with an offline BM25 model of their descriptions, flags skills that fight for the same prompts and skills that never win.",
+  "scripts": {
+    "build": "tsc --noEmit -p . && esbuild src/main.ts --bundle --format=esm --target=es2022 --minify --legal-comments=none --outfile=package/ui/trigger.js",
+    "package": "python3 tools/formpkg.py build package -o dist"
+  },
+  "devDependencies": {
+    "esbuild": "0.25.10",
+    "typescript": "5.9.3"
+  }
+}
