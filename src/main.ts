@@ -545,7 +545,7 @@ formext.onActivate(async (a) => {
       level = err instanceof FormExtError && err.code === ERR.CANCELLED ? "info" : "error";
       message = level === "info" ? "Cancelled." : words(err);
     }
-    if (message) await formext.notify(`Podcast Chapters: ${message}`, level).catch(() => undefined);
+    if (message) await formext.notify(message, level).catch(() => undefined);
     await formext.done(message ? { message, level } : undefined).catch(() => undefined);
   }, 0);
 });
