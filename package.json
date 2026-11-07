@@ -1,0 +1,16 @@
+{
+  "name": "formext-formwav-podcast-chapters",
+  "version": "0.1.0",
+  "private": true,
+  "license": "Apache-2.0",
+  "description": "Podcast Chapters, a FormWav extension: markers to Podcasting 2.0 chapters JSON and ID3 CHAP frames.",
+  "scripts": {
+    "check": "tsc --noEmit -p .",
+    "build": "tsc --noEmit -p . && esbuild src/main.ts --bundle --format=esm --target=es2020 --minify --legal-comments=none --outfile=package/ui/chapters.js",
+    "package": "python3 tools/formpkg.py build package -o dist"
+  },
+  "devDependencies": {
+    "esbuild": "0.25.10",
+    "typescript": "5.9.3"
+  }
+}
