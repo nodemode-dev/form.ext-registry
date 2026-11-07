@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.1 (2026-11-07)
+
+Same extension as 0.1.0; packaging only. Verified in FormDeck 0.32.0, installed as FormPortal does and from `dev.json`.
+
+- `tools/formpkg.py` is the contract kit's current copy, which requires `api: "1"`, refuses native packages and reports malformed manifests instead of raising.
+
+Package: `rehearsal-coach-0.1.1.formpkg`, 12421 bytes, SHA-256 `5a5577353ddef2bdacba67bc6afc3802d95fbe1733f92a45a995a7861ac91b30`.
+
 ## 0.1.0 (2026-11-07)
 
 First release, for FormDeck 0.32.0 (Form Extension Contract, API 1).

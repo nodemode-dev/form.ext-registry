@@ -16,7 +16,7 @@ It works with FormDeck's own Rehearse Timings and Speech Rehearsal rather than r
 
 ## Install
 
-- **Through FormPortal.** Find Rehearsal Coach among FormDeck's extensions in FormPortal and install it, or give FormPortal the `rehearsal-coach-0.1.0.formpkg` file to install. FormDeck picks it up within two seconds. In FormDeck choose Extensions > Rehearsal Coach: Open Rehearsal Coach, or open it from the Extensions panel, and allow it to read and change the open deck when asked.
+- **Through FormPortal.** Find Rehearsal Coach among FormDeck's extensions in FormPortal and install it, or give FormPortal the `rehearsal-coach-0.1.1.formpkg` file to install. FormDeck picks it up within two seconds. In FormDeck choose Extensions > Rehearsal Coach: Open Rehearsal Coach, or open it from the Extensions panel, and allow it to read and change the open deck when asked.
 - **From this folder (development).** Use form.ext's Run in App, or list `package/` in `extensions/formdeck/dev.json` under FormPortal's root (see FormDeck's `docs/EXTENSIONS.md`), then Extensions > Reload Extensions.
 
 Needs FormDeck 0.32.0 or later.
@@ -26,7 +26,7 @@ Needs FormDeck 0.32.0 or later.
 ```sh
 npm install
 npm run build      # type check, bundle src/ into package/ui/
-npm run package    # dist/rehearsal-coach-0.1.0.formpkg, with its SHA-256 and size
+npm run package    # dist/rehearsal-coach-0.1.1.formpkg, with its SHA-256 and size
 python3 tools/formpkg.py validate package
 ```
 
