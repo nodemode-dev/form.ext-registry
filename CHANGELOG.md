@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.1.0
+## 0.1.0 (2026-11-07)
 
 - Handwriting Reveal panel for FormVFX: pick a text layer, Trace, preview the writing, Write On.
 - Centre line tracer in the sandbox: distance transform, thinning, spur pruning, strokes joined through junctions by the straightest continuation, dots, smoothing and Bezier fitting.
