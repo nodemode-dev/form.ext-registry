@@ -1,0 +1,16 @@
+{
+  "name": "formext-formvfx-handwriting-reveal",
+  "version": "0.1.0",
+  "private": true,
+  "license": "Apache-2.0",
+  "description": "Handwriting Reveal, a FormVFX extension: traces the centre line of each letter of a text layer in pen order and writes it on as animated strokes.",
+  "scripts": {
+    "check": "tsc --noEmit -p .",
+    "build": "tsc --noEmit -p . && esbuild src/main.ts --bundle --format=esm --target=es2020 --minify --legal-comments=none --outfile=package/ui/handwriting-reveal.js && esbuild src/handwriting-reveal.css --minify --outfile=package/ui/handwriting-reveal.css",
+    "package": "python3 tools/formpkg.py build package -o dist"
+  },
+  "devDependencies": {
+    "esbuild": "0.25.12",
+    "typescript": "5.9.3"
+  }
+}
