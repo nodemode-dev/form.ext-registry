@@ -1,0 +1,26 @@
+{
+  "format": "formai-package",
+  "format_version": 1,
+  "id": "tool-diff",
+  "name": "Tool Diff",
+  "product": "formmcp",
+  "kind": "script-plugin",
+  "version": "0.1.0",
+  "author": "nodemode",
+  "licence": "Apache-2.0",
+  "native": false,
+  "permissions": ["document", "files-read", "files-write"],
+  "minimum_app": "0.9.0",
+  "api": "1",
+  "description": "Keeps snapshots of each Form app's tool list as formMCP sees it, or imports a saved tools/list with argument schemas, and compares any two: added, removed, renamed and changed tools and arguments, with breaking changes flagged, saved as an HTML or JSON report. Agents can run Check for Tool Changes to hear what changed since the last snapshot.",
+  "entry": { "ui": "ui/index.html" },
+  "contributes": {
+    "panels": [{ "id": "main", "title": "Tool Diff", "location": "dialog" }],
+    "commands": [
+      { "id": "compare", "title": "Compare Tool Snapshots", "panel": "main" },
+      { "id": "snapshot-all", "title": "Snapshot Every App's Tools" },
+      { "id": "check", "title": "Check for Tool Changes" }
+    ]
+  },
+  "homepage": "https://formai.studio/extensions/#tool-diff"
+}
