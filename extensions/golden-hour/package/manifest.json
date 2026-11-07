@@ -1,0 +1,25 @@
+{
+  "format": "formai-package",
+  "format_version": 1,
+  "id": "golden-hour",
+  "name": "Golden Hour",
+  "product": "formlit",
+  "kind": "script-plugin",
+  "version": "0.1.1",
+  "author": "nodemode",
+  "licence": "Apache-2.0",
+  "native": false,
+  "permissions": ["document", "files-write"],
+  "minimum_app": "0.50.0",
+  "api": "1",
+  "description": "For the selected geotagged photos, works out where the sun and moon were, golden hour, blue hour and twilight at the place and time each was taken, draws the day's sun path, and tags each photo with light keywords such as golden-hour, blue-hour, backlit or moonlit. Pure astronomy, no network.",
+  "entry": { "ui": "ui/index.html" },
+  "contributes": {
+    "panels": [{ "id": "main", "title": "Golden Hour", "location": "dock" }],
+    "commands": [
+      { "id": "show", "title": "Show Sun and Moon for Selected Photos", "panel": "main" },
+      { "id": "tag-selected", "title": "Tag Light Keywords on Selected Photos" }
+    ]
+  },
+  "homepage": "https://formai.studio/extensions/#golden-hour"
+}

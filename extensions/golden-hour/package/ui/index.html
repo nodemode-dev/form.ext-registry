@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Golden Hour</title>
+    <link rel="stylesheet" href="golden-hour.css" />
+  </head>
+  <body>
+    <main class="gh">
+      <header class="gh-bar">
+        <svg class="gh-ico" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M3 17h18M7 17a5 5 0 0 1 10 0M12 6V4M5.6 10.6 4.2 9.2M18.4 10.6l1.4-1.4M2 13h2M20 13h2"/></svg>
+        <span class="gh-count" id="count">Reading the selection</span>
+        <button class="gh-icon-btn" id="refresh" type="button" title="Read the selection again" aria-label="Read the selection again"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/></svg></button>
+      </header>
+      <div class="gh-status" id="status" role="status" aria-live="polite">
+        <span class="gh-meter" aria-hidden="true"><span class="gh-meter-fill" id="meter"></span></span>
+        <span class="gh-status-text" id="status-text">&nbsp;</span>
+        <button class="gh-link" id="cancel" type="button" disabled>Cancel</button>
+      </div>
+      <ul class="gh-list" id="list" role="listbox" aria-label="Selected photos" tabindex="0"></ul>
+      <section class="gh-view" aria-label="Sun and moon">
+        <div class="gh-view-head">
+          <span class="gh-view-title" id="view-title">No photo</span>
+          <span class="gh-seg" role="tablist" aria-label="Diagram">
+            <button type="button" role="tab" data-view="day" aria-selected="true" class="is-on">Day</button>
+            <button type="button" role="tab" data-view="sky" aria-selected="false">Sky</button>
+          </span>
+          <button class="gh-icon-btn" id="save-svg" type="button" title="Save this diagram as SVG" aria-label="Save this diagram as SVG" disabled><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg></button>
+        </div>
+        <svg class="gh-chart" id="chart" viewBox="0 0 320 168" role="img" aria-label="Sun path diagram"></svg>
+        <dl class="gh-facts">
+          <dt>Light</dt><dd id="f-light">&nbsp;</dd>
+          <dt>Sun</dt><dd id="f-sun">&nbsp;</dd>
+          <dt>Moon</dt><dd id="f-moon">&nbsp;</dd>
+          <dt>Sunrise</dt><dd id="f-rise">&nbsp;</dd>
+          <dt>Golden</dt><dd id="f-golden">&nbsp;</dd>
+          <dt>Blue</dt><dd id="f-blue">&nbsp;</dd>
+          <dt>Civil</dt><dd id="f-civil">&nbsp;</dd>
+          <dt>Nautical</dt><dd id="f-nautical">&nbsp;</dd>
+          <dt>Astro</dt><dd id="f-astro">&nbsp;</dd>
+          <dt>Moonrise</dt><dd id="f-moonrise">&nbsp;</dd>
+          <dt>Phase</dt><dd id="f-phase">&nbsp;</dd>
+          <dt>Time zone</dt><dd id="f-zone">&nbsp;</dd>
+        </dl>
+      </section>
+      <section class="gh-tags" aria-label="Keywords">
+        <div class="gh-sub">Keywords</div>
+        <label class="gh-field"><span>Parent</span><input class="gh-input" id="parent" type="text" spellcheck="false" value="Light" /></label>
+        <label class="gh-field"><span>Time zone</span><select class="gh-input" id="zone"><option value="auto">From the photo, else estimated</option></select></label>
+        <div class="gh-checks">
+          <label><input type="checkbox" id="opt-time" checked /> Morning or evening</label>
+          <label><input type="checkbox" id="opt-dir" checked /> Light direction</label>
+          <label><input type="checkbox" id="opt-moon" checked /> Moonlit</label>
+        </div>
+        <p class="gh-preview" id="preview">&nbsp;</p>
+        <div class="gh-actions">
+          <button class="gh-btn" id="save-csv" type="button" disabled>Save Timetable</button>
+          <button class="gh-btn gh-btn-cta" id="write" type="button" disabled>Write Keywords</button>
+        </div>
+      </section>
+    </main>
+    <script type="module" src="golden-hour.js"></script>
+  </body>
+</html>

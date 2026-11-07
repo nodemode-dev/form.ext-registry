@@ -1,0 +1,389 @@
+:root {
+  color-scheme: dark;
+  --gh-bg: var(--surface-1, var(--panel, #17151b));
+  --gh-field: var(--bg-input, var(--surface-field, var(--bg, #222127)));
+  --gh-raised: var(--surface-2, var(--bg-node, #191919));
+  --gh-text: var(--text-primary, var(--text, #f7f7f7));
+  --gh-muted: var(--text-secondary, var(--muted, #a4a4a4));
+  --gh-faint: var(--text-muted, var(--muted, #717072));
+  --gh-line: var(--line-1, var(--border-color, var(--border, #2a2a2a)));
+  --gh-line-strong: var(--line-3, var(--border-light, var(--border, #34333a)));
+  --gh-accent: var(--accent-color, var(--accent, #f97316));
+  --gh-accent-soft: var(--accent-soft, color-mix(in srgb, var(--gh-accent) 20%, transparent));
+  --gh-cta-bg: var(--cta-bg, #ffffff);
+  --gh-cta-text: var(--cta-text, #000000);
+  --gh-danger: var(--danger-text, #fca5a5);
+  --gh-radius: var(--radius, 6px);
+  --gh-radius-sm: var(--radius-sm, 4px);
+  --gh-font: var(--font-ui, -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', system-ui, sans-serif);
+  --gh-fs: var(--fs-12, 12px);
+  --gh-fs-sm: var(--fs-11, 11px);
+  --gh-night: #141a2e;
+  --gh-astro: #1c2647;
+  --gh-nautical: #26366a;
+  --gh-blue: #3456a8;
+  --gh-golden: #e8a33d;
+  --gh-day: #6f9fd8;
+  --gh-high: #a8c8ee;
+  --gh-sun: #ffcf5a;
+  --gh-moon: #d9dce6;
+  --gh-ink: #f2f2f2;
+}
+:root[data-theme='light'] {
+  color-scheme: light;
+  --gh-bg: var(--surface-1, var(--panel, #f4f3f1));
+  --gh-field: var(--bg-input, var(--bg, #ffffff));
+  --gh-raised: var(--surface-2, #ffffff);
+  --gh-text: var(--text-primary, var(--text, #1b1b1d));
+  --gh-muted: var(--text-secondary, var(--muted, #55545a));
+  --gh-faint: var(--text-muted, var(--muted, #8a898f));
+  --gh-line: var(--line-1, var(--border-color, var(--border, #dddbd6)));
+  --gh-line-strong: var(--line-3, var(--border-light, var(--border, #c9c7c2)));
+  --gh-cta-bg: var(--cta-bg, #1b1b1d);
+  --gh-cta-text: var(--cta-text, #ffffff);
+  --gh-danger: var(--danger, #b91c1c);
+  --gh-night: #3a4366;
+  --gh-astro: #4b5a8c;
+  --gh-nautical: #6177b5;
+  --gh-blue: #7f9fe0;
+  --gh-golden: #f2bc5e;
+  --gh-day: #a9cbef;
+  --gh-high: #d3e5f8;
+  --gh-sun: #e08a00;
+  --gh-moon: #5a6070;
+  --gh-ink: #1b1b1d;
+}
+* {
+  box-sizing: border-box;
+}
+html,
+body {
+  margin: 0;
+  background: var(--gh-bg);
+  color: var(--gh-text);
+  font-family: var(--gh-font);
+  font-size: var(--gh-fs);
+  line-height: 1.4;
+}
+button,
+input,
+select {
+  font: inherit;
+  color: inherit;
+}
+.gh {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px 10px 10px;
+  min-width: 240px;
+}
+.gh-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 24px;
+  color: var(--gh-muted);
+}
+.gh-ico {
+  flex: none;
+  color: var(--gh-accent);
+}
+.gh-count {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.gh-icon-btn {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--gh-radius-sm);
+  background: transparent;
+  color: var(--gh-muted);
+  cursor: pointer;
+}
+.gh-icon-btn:hover:not(:disabled) {
+  background: var(--gh-raised);
+  color: var(--gh-text);
+}
+.gh-icon-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.gh-status {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  height: 18px;
+  font-size: var(--gh-fs-sm);
+  color: var(--gh-faint);
+}
+.gh-status.is-error {
+  color: var(--gh-danger);
+}
+.gh-meter {
+  position: relative;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--gh-line);
+  overflow: hidden;
+}
+.gh-meter-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 0;
+  background: var(--gh-accent);
+  transition: width 0.15s ease;
+}
+.gh-status-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.gh-link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--gh-accent);
+  font-size: var(--gh-fs-sm);
+  cursor: pointer;
+}
+.gh-link:disabled {
+  visibility: hidden;
+}
+.gh-list {
+  height: 132px;
+  margin: 0;
+  padding: 2px;
+  list-style: none;
+  overflow-y: auto;
+  border: 1px solid var(--gh-line);
+  border-radius: var(--gh-radius);
+  background: var(--gh-field);
+  outline: none;
+}
+.gh-list:focus-visible {
+  border-color: var(--gh-accent);
+}
+.gh-row {
+  display: grid;
+  grid-template-columns: 8px minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 8px;
+  height: 25px;
+  padding: 0 6px;
+  border-radius: var(--gh-radius-sm);
+  cursor: pointer;
+}
+.gh-row:hover {
+  background: var(--gh-raised);
+}
+.gh-row[aria-selected='true'] {
+  background: var(--gh-accent-soft);
+}
+.gh-row.is-off {
+  color: var(--gh-faint);
+}
+.gh-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--gh-line-strong);
+}
+.gh-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.gh-time {
+  font-variant-numeric: tabular-nums;
+  color: var(--gh-muted);
+}
+.gh-chip {
+  min-width: 74px;
+  text-align: right;
+  font-size: var(--gh-fs-sm);
+  color: var(--gh-muted);
+}
+.gh-empty {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  padding: 0 12px;
+  text-align: center;
+  color: var(--gh-faint);
+}
+.k-night { background: var(--gh-night); }
+.k-astronomical-twilight { background: var(--gh-astro); }
+.k-nautical-twilight { background: var(--gh-nautical); }
+.k-blue-hour { background: var(--gh-blue); }
+.k-golden-hour { background: var(--gh-golden); }
+.k-daylight { background: var(--gh-day); }
+.k-high-sun { background: var(--gh-high); }
+.gh-view {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 8px;
+  border-top: 1px solid var(--gh-line);
+}
+.gh-view-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 24px;
+}
+.gh-view-title {
+  flex: 1;
+  min-width: 0;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.gh-seg {
+  display: inline-flex;
+  gap: 2px;
+  padding: 2px;
+  border: 1px solid var(--gh-line);
+  border-radius: 7px;
+  background: var(--gh-field);
+}
+.gh-seg button {
+  height: 18px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--gh-muted);
+  font-size: var(--gh-fs-sm);
+  cursor: pointer;
+}
+.gh-seg button.is-on {
+  background: var(--gh-accent-soft);
+  color: var(--gh-accent);
+}
+.gh-chart {
+  display: block;
+  width: 100%;
+  aspect-ratio: 320 / 168;
+  border-radius: var(--gh-radius);
+  background: var(--gh-field);
+}
+.gh-chart text {
+  font-family: var(--gh-font);
+  font-size: 9px;
+  fill: var(--gh-muted);
+}
+.gh-chart .t-band {
+  fill: var(--gh-ink);
+  opacity: 0.7;
+}
+.gh-facts {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
+  gap: 3px 10px;
+  margin: 0;
+}
+.gh-facts dt {
+  color: var(--gh-faint);
+}
+.gh-facts dd {
+  margin: 0;
+  min-height: 1.4em;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.gh-tags {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 8px;
+  border-top: 1px solid var(--gh-line);
+}
+.gh-sub {
+  font-weight: 600;
+  color: var(--gh-muted);
+}
+.gh-field {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  color: var(--gh-faint);
+}
+.gh-input {
+  height: 24px;
+  min-width: 0;
+  padding: 0 6px;
+  border: 1px solid var(--gh-line);
+  border-radius: var(--gh-radius-sm);
+  background: var(--gh-field);
+  color: var(--gh-text);
+}
+.gh-input:focus {
+  outline: none;
+  border-color: var(--gh-accent);
+}
+.gh-checks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  padding-left: 74px;
+  color: var(--gh-muted);
+}
+.gh-checks label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+.gh-checks input {
+  margin: 0;
+  accent-color: var(--gh-accent);
+}
+.gh-preview {
+  height: 2.8em;
+  margin: 0;
+  overflow: hidden;
+  color: var(--gh-faint);
+  font-size: var(--gh-fs-sm);
+}
+.gh-actions {
+  display: flex;
+  gap: 6px;
+}
+.gh-btn {
+  flex: 1;
+  height: 28px;
+  padding: 0 10px;
+  border: 1px solid var(--gh-line-strong);
+  border-radius: 7px;
+  background: var(--gh-raised);
+  color: var(--gh-text);
+  white-space: nowrap;
+  cursor: pointer;
+}
+.gh-btn:hover:not(:disabled) {
+  border-color: var(--gh-accent);
+}
+.gh-btn-cta {
+  border-color: transparent;
+  background: var(--gh-cta-bg);
+  color: var(--gh-cta-text);
+  font-weight: 600;
+}
+.gh-btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
