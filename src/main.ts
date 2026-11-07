@@ -39,6 +39,7 @@ const sClear = $<HTMLButtonElement>('sClear');
 
 const PHASE: Record<M.Phase, string> = { focus: 'Focus', short: 'Short break', long: 'Long break' };
 const MINI: Record<M.Phase, string> = { focus: 'Focus', short: 'Break', long: 'Break' };
+const LABEL: Record<M.Phase, string> = { focus: 'Focus', short: 'Break', long: 'Long break' };
 
 let state = M.fresh();
 let locale = navigator.language || 'en';
@@ -127,9 +128,9 @@ function renderTimer(now: number) {
   if (root.dataset.status !== run.status) root.dataset.status = run.status;
   put(time, clock(rest));
   put(mini, run.status === 'paused' ? 'Paused' : MINI[run.phase]);
-  put(phaseEl, PHASE[run.phase]);
+  put(phaseEl, LABEL[run.phase]);
   const every = state.settings.every;
-  put(count, run.phase === 'focus' ? `${Math.min(run.done + 1, every)} of ${every}` : `${Math.min(run.done, every)} of ${every} done`);
+  put(count, run.phase === 'focus' ? `${Math.min(run.done + 1, every)} of ${every}` : `${Math.min(run.done, every)} of ${every}`);
   const offset = String(Math.round(1000 * (1 - rest / Math.max(1, total))));
   if (prog.style.strokeDashoffset !== offset) prog.style.strokeDashoffset = offset;
   const word = run.status === 'running' ? 'Pause' : run.status === 'paused' ? 'Resume' : 'Start';
