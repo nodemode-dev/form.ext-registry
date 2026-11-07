@@ -278,6 +278,7 @@ async function make(): Promise<void> {
     const urls = new Map(sheets.map((sh) => [`${s.prefix}${sh.name}`, sh.url]));
     made = { plan: p, settings: s, sheets, vtt, cues: parsed, urls };
     showMade();
+    $('player').scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     const total = sheets.reduce((n, sh) => n + sh.blob.size, 0);
     status(`Made ${p.count} thumbnails in ${sheets.length === 1 ? '1 sheet' : `${sheets.length} sheets`} (${bytes(total)}) in ${((performance.now() - t0) / 1000).toFixed(1)} s. Hover the test player's bar to try them.`, 'good');
   } catch (e) {
