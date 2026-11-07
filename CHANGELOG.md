@@ -1,8 +1,9 @@
 # Changelog
 
-## 0.1.0
+## 0.1.0 (2026-11-07)
 
-First release, for FormCut 2.14.0 (Form Extension Contract, API 1).
+First release, for FormCut 2.14.0 (Form Extension Contract, API 1). Package `shot-list-0.1.0.formpkg`, 16611 bytes,
+SHA-256 `c3f78896bf9dc0b635d8dd4cd6ca0629e1880d3817c7f5d6b110ec4d286db7b0`.
 
 - A dock panel listing every picture clip of the active timeline (video, images, titles, nested timelines, devices)
   as a numbered shot, in timeline order, with its record in timecode, duration, track and source file.
