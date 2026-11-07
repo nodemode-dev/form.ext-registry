@@ -32,8 +32,24 @@ def problems(folder: Path) -> tuple[list[str], dict]:
             out.append(f"manifest.json: {key} is required")
     if m.get("format") != "formai-package":
         out.append("manifest.json: format must be formai-package")
-    if m.get("format_version") != 1:
+    if m.get("format_version") != 1 or isinstance(m.get("format_version"), bool):
         out.append("manifest.json: format_version must be 1")
+    if m.get("native") is True:
+        out.append("manifest.json: native extensions are not supported by API 1 hosts")
+    if not isinstance(m.get("entry", {}), dict):
+        out.append("manifest.json: entry must be an object")
+        m["entry"] = {}
+    if not isinstance(m.get("contributes", {}), dict):
+        out.append("manifest.json: contributes must be an object")
+        m["contributes"] = {}
+    for group in ("panels", "commands"):
+        items = (m.get("contributes") or {}).get(group)
+        if items is not None and (not isinstance(items, list) or any(not isinstance(i, dict) for i in items)):
+            out.append(f"manifest.json: contributes.{group} must be a list of objects")
+            m["contributes"][group] = []
+    if not isinstance((m.get("entry") or {}).get("ui", ""), str):
+        out.append("manifest.json: entry.ui must be a path inside the package")
+        m["entry"] = {}
     if not ID_RE.match(str(m.get("id", ""))):
         out.append("manifest.json: id must match ^[a-z0-9][a-z0-9-]{1,63}$")
     if m.get("product") not in PRODUCTS:
@@ -49,8 +65,8 @@ def problems(folder: Path) -> tuple[list[str], dict]:
     perms = m.get("permissions")
     if not isinstance(perms, list) or any(p not in PERMISSIONS for p in perms) or len(set(perms or [])) != len(perms or []):
         out.append(f"manifest.json: permissions must be unique values from {', '.join(PERMISSIONS)}")
-    if "api" in m and m["api"] != "1":
-        out.append('manifest.json: api must be "1"')
+    if m.get("api") != "1":
+        out.append('manifest.json: api must be "1" (every API 1 host refuses a package without it)')
     contributes = m.get("contributes") or {}
     entry = (m.get("entry") or {}).get("ui")
     for group in ("panels", "commands"):
