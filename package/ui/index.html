@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Halftone Separations</title>
+    <link rel="stylesheet" href="halftone.css" />
+  </head>
+  <body>
+    <main class="hs" id="app" data-mode="cmyk" data-busy="false" data-ready="false">
+      <section class="view" aria-label="Preview">
+        <div class="view-bar">
+          <div class="seg" role="radiogroup" aria-label="Zoom" id="zoom">
+            <button type="button" role="radio" aria-checked="true" data-zoom="fit">Fit</button>
+            <button type="button" role="radio" aria-checked="false" data-zoom="1">100%</button>
+            <button type="button" role="radio" aria-checked="false" data-zoom="2">200%</button>
+          </div>
+          <label class="view-pick"><span class="sr">Show</span>
+            <select id="show">
+              <option value="all">Overprint</option>
+              <option value="0">Plate 1</option>
+              <option value="1">Plate 2</option>
+              <option value="2">Plate 3</option>
+              <option value="3">Plate 4</option>
+            </select>
+          </label>
+        </div>
+        <div class="stage" id="stage">
+          <canvas id="canvas" width="1" height="1"></canvas>
+          <p class="stage-note" id="note">Reading the picture&hellip;</p>
+        </div>
+        <p class="doc-line" id="doc">&nbsp;</p>
+      </section>
+
+      <section class="controls" aria-label="Separation settings">
+        <div class="row">
+          <span class="lbl">Inks</span>
+          <div class="seg wide" role="radiogroup" aria-label="Inks" id="mode">
+            <button type="button" role="radio" aria-checked="true" data-mode="cmyk">Process CMYK</button>
+            <button type="button" role="radio" aria-checked="false" data-mode="spot">Spot Inks</button>
+          </div>
+        </div>
+        <div class="row">
+          <span class="lbl">Set</span>
+          <select id="preset" aria-label="Ink set">
+            <option value="process">Process cyan, magenta, yellow, black</option>
+          </select>
+        </div>
+        <div class="row">
+          <span class="lbl">Paper</span>
+          <div class="pair">
+            <input type="color" id="paper" value="#f6f3ec" aria-label="Paper colour" />
+            <input type="text" id="paper-hex" value="#f6f3ec" spellcheck="false" maxlength="7" aria-label="Paper colour code" />
+          </div>
+        </div>
+
+        <div class="plates" role="table" aria-label="Plates">
+          <div class="plate head" role="row">
+            <span role="columnheader" class="sr">Preview</span>
+            <span role="columnheader">Ink</span>
+            <span role="columnheader">Angle</span>
+            <span role="columnheader">LPI</span>
+            <span role="columnheader">Dot</span>
+            <span role="columnheader">Ink %</span>
+            <span role="columnheader" class="sr">Remove</span>
+          </div>
+          <div class="plate" role="row" data-i="0"></div>
+          <div class="plate" role="row" data-i="1"></div>
+          <div class="plate" role="row" data-i="2"></div>
+          <div class="plate" role="row" data-i="3"></div>
+        </div>
+
+        <div class="row">
+          <span class="lbl">Resolution</span>
+          <div class="pair">
+            <input type="number" id="ppi" min="36" max="2400" step="1" value="300" aria-label="Resolution in pixels per inch" />
+            <span class="unit">ppi</span>
+            <span class="hint" id="cell">&nbsp;</span>
+          </div>
+        </div>
+        <div class="row">
+          <span class="lbl">Edges</span>
+          <div class="seg wide" role="radiogroup" aria-label="Dot edges" id="edges">
+            <button type="button" role="radio" aria-checked="true" data-hard="false">Smooth</button>
+            <button type="button" role="radio" aria-checked="false" data-hard="true">Hard (1-bit)</button>
+          </div>
+        </div>
+        <div class="row">
+          <span class="lbl" title="Misregistration: shifts each plate a little, as a duplicator or screen print drifts">Misregister</span>
+          <div class="slide"><input type="range" id="misreg" min="0" max="24" step="1" value="0" aria-label="Misregistration in pixels" /><input type="number" id="misreg-n" min="0" max="24" step="1" value="0" aria-label="Misregistration value" /><span class="unit">px</span></div>
+        </div>
+        <div class="row cmyk-only">
+          <span class="lbl" title="Black generation: how much of the grey in each colour the black plate carries">Black</span>
+          <div class="slide"><input type="range" id="bg" min="0" max="100" step="1" value="60" aria-label="Black generation" /><input type="number" id="bg-n" min="0" max="100" step="1" value="60" aria-label="Black generation value" /><span class="unit">%</span></div>
+        </div>
+        <div class="row cmyk-only">
+          <span class="lbl" title="Total ink limit: the most cyan, magenta, yellow and black may add up to on one spot">Ink limit</span>
+          <div class="slide"><input type="range" id="limit" min="200" max="400" step="5" value="300" aria-label="Total ink limit" /><input type="number" id="limit-n" min="200" max="400" step="5" value="300" aria-label="Total ink limit value" /><span class="unit">%</span></div>
+        </div>
+      </section>
+
+      <footer class="foot">
+        <div class="progress" id="progress" aria-live="polite">
+          <span class="status" id="status">&nbsp;</span>
+          <div class="bar"><span id="bar"></span></div>
+          <button type="button" class="btn ghost" id="cancel">Cancel</button>
+        </div>
+        <div class="actions">
+          <button type="button" class="btn" id="save">
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v8M4.5 6.5 8 10l3.5-3.5M3 12.5h10" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Save Plates as PNG&hellip;
+          </button>
+          <button type="button" class="btn primary" id="layers">
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2.5 14 5.5 8 8.5 2 5.5ZM2 8.2l6 3 6-3M2 10.9l6 3 6-3" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+            Add as Layers
+          </button>
+        </div>
+      </footer>
+    </main>
+    <template id="plate-row">
+      <button type="button" class="eye" aria-pressed="true" aria-label="Show this plate in the preview"><svg viewBox="0 0 16 16" aria-hidden="true"><path class="open" d="M1.5 8S4 3.5 8 3.5 14.5 8 14.5 8 12 12.5 8 12.5 1.5 8 1.5 8Z" fill="none" stroke="currentColor" stroke-width="1.3"/><circle class="open" cx="8" cy="8" r="2" fill="currentColor"/><path class="shut" d="M2 2.5l12 11M1.5 8S4 3.5 8 3.5c1.2 0 2.3.4 3.2 1M14.5 8s-2.5 4.5-6.5 4.5c-1.2 0-2.3-.4-3.2-1" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button>
+      <span class="ink"><input type="color" class="swatch" aria-label="Ink colour" /><select class="ink-name" aria-label="Ink"></select></span>
+      <input type="number" class="angle" min="0" max="179" step="1" aria-label="Screen angle in degrees" />
+      <input type="number" class="lpi" min="5" max="300" step="1" aria-label="Screen frequency in lines per inch" />
+      <select class="shape" aria-label="Dot shape"></select>
+      <input type="number" class="density" min="0" max="150" step="1" aria-label="Ink amount in percent" />
+      <button type="button" class="remove" aria-label="Remove this ink"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.5 4.5l7 7M11.5 4.5l-7 7" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></button>
+      <button type="button" class="add" aria-label="Add an ink"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3.5v9M3.5 8h9" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Add ink</button>
+    </template>
+    <script type="module" src="halftone.js"></script>
+  </body>
+</html>
