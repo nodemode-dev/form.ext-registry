@@ -1,5 +1,11 @@
 # HASHOUT_LOG
 
+## 2026-11-07: v0.1.1
+
+`tools/formpkg.py` is copied again from the kit after the 07:47 contract update: it now refuses a package without `api: "1"` or with `native: true`, and reports malformed `entry` and `contributes` instead of raising. The package itself is unchanged in content; only its version moves.
+
+Checked in the real form.md 0.50.0 window (built client, 4x CPU): `doc.select` then `doc.insertText` with `at: cursor` puts the citation inline in the person's paragraph (form.md 0.50.0 makes single-paragraph text at the cursor inline); `doc.insertMarkdown` and `doc.replaceBlock` return the new block ids, so Update replaces the previous list and one Undo brings it back; `*italic*`, `<url>` autolinks and `\[1\]` labels import as italics, links and plain `[1]` text, with no list made.
+
 ## 2026-11-07: v0.1.0
 
 Citations are Pandoc-style text, `[@key]`, `[@a; @b, p. 12]`, `[see @key]`. Keeping them as plain text in the page means they survive Copy as Markdown, export, other people's edits and other tools, and the panel can always rebuild the bibliography from the page itself. Only bracketed keys count, so an e-mail address or an @mention is never read as a citation. Code and math blocks are skipped.
