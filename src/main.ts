@@ -314,18 +314,17 @@ function decode(data: string): Uint8Array {
 }
 
 async function decodeChunked(data: string, j: Job, from: number, to: number): Promise<Uint8Array> {
-  const clean = data.replace(/[^A-Za-z0-9+/=]/g, "");
-  const pad = clean.endsWith("==") ? 2 : clean.endsWith("=") ? 1 : 0;
-  const out = new Uint8Array((clean.length / 4) * 3 - pad);
+  if (/\s/.test(data.slice(0, 4096))) data = data.replace(/\s+/g, "");
+  const out = new Uint8Array(Math.ceil(data.length / 4) * 3);
   const chunk = 4 * 262144;
   let at = 0;
-  for (let i = 0; i < clean.length; i += chunk) {
-    const text = atob(clean.slice(i, i + chunk));
+  for (let i = 0; i < data.length; i += chunk) {
+    const text = atob(data.slice(i, i + chunk));
     for (let k = 0; k < text.length; k++) out[at + k] = text.charCodeAt(k);
     at += text.length;
-    await j.step(from + ((to - from) * i) / clean.length);
+    await j.step(from + ((to - from) * i) / data.length);
   }
-  return out;
+  return out.subarray(0, at);
 }
 
 async function encodeChunked(bytes: Uint8Array, j: Job, from: number, to: number): Promise<string> {
