@@ -1,0 +1,20 @@
+{
+  "format": "formai-package",
+  "format_version": 1,
+  "id": "hello-formext",
+  "name": "Hello",
+  "product": "formvis",
+  "kind": "script-plugin",
+  "version": "0.1.0",
+  "author": "nodemode",
+  "licence": "Apache-2.0",
+  "native": false,
+  "permissions": ["document"],
+  "api": "1",
+  "description": "The smallest working extension: a panel that shows what the host says about itself and the open document.",
+  "entry": { "ui": "ui/index.html" },
+  "contributes": {
+    "panels": [{ "id": "main", "title": "Hello", "location": "dock" }],
+    "commands": [{ "id": "say-hello", "title": "Say Hello" }]
+  }
+}

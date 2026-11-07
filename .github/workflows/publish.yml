@@ -1,0 +1,69 @@
+name: publish
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install the tools' requirements
+        run: pip install -r tools/requirements.txt
+      - name: Build, sign and index every package
+        env:
+          REGISTRY_SIGNING_KEY: ${{ secrets.REGISTRY_SIGNING_KEY }}
+          PUBLISHER_SIGNING_KEY: ${{ secrets.PUBLISHER_SIGNING_KEY }}
+        run: python tools/build_index.py --require-keys
+      - name: Release every version not released yet
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          for pkg in dist/packages/*.formpkg; do
+            name="$(basename "$pkg" .formpkg)"
+            version="${name##*-}"
+            id="${name%-*}"
+            tag="ext-${id}-v${version}"
+            if gh release view "$tag" >/dev/null 2>&1; then
+              echo "$tag is already released; its bytes stay as they are"
+              continue
+            fi
+            gh release create "$tag" "$pkg" \
+              --target "$GITHUB_SHA" \
+              --title "${id} ${version}" \
+              --notes "${id} ${version}, built from extensions/${id} at ${GITHUB_SHA}. Verified by the Form Extension Registry and signed by the nodemode publisher key." \
+              --latest=false
+          done
+      - name: Upload the signed index and block list
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          if ! gh release view index >/dev/null 2>&1; then
+            gh release create index \
+              --target "$GITHUB_SHA" \
+              --title "Extension index" \
+              --notes "The signed index of verified Form extensions and the signed block list. Rewritten on every push to main." \
+              --latest=false
+          fi
+          gh release upload index \
+            dist/extensions.json dist/extensions.json.sig \
+            dist/blocklist.json dist/blocklist.json.sig \
+            --clobber

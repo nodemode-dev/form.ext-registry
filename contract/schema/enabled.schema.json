@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://formai.studio/catalog/v1/schema/enabled.schema.json",
+  "title": "FormPortal enabled extensions (per product)",
+  "type": "object",
+  "required": [
+    "format",
+    "format_version",
+    "product",
+    "extensions"
+  ],
+  "properties": {
+    "format": {
+      "const": "formportal-enabled-extensions"
+    },
+    "format_version": {
+      "const": 1
+    },
+    "product": {
+      "enum": [
+        "formvis",
+        "formcut",
+        "formwav",
+        "formpdf",
+        "formdeck",
+        "formlit",
+        "formmd",
+        "formencoder",
+        "formvfx",
+        "formmcp",
+        "formtray",
+        "formskills",
+        "formportal"
+      ]
+    },
+    "extensions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "version",
+          "path"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9-]{1,63}$"
+          },
+          "path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "kind": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          },
+          "permissions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "native": {
+            "type": "boolean"
+          },
+          "source": {
+            "enum": [
+              "catalogue",
+              "sideload"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

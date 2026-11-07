@@ -1,0 +1,220 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://formai.studio/catalog/v1/schema/extensions.schema.json",
+  "title": "formai extension index",
+  "type": "object",
+  "required": [
+    "format",
+    "format_version",
+    "name",
+    "publishers",
+    "packages"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "format": {
+      "const": "formai-extensions"
+    },
+    "format_version": {
+      "const": 1
+    },
+    "name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "fixture": {
+      "type": "boolean"
+    },
+    "publishers": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/publisher"
+      }
+    },
+    "packages": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/entry"
+      }
+    }
+  },
+  "$defs": {
+    "publisher": {
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "public_key"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]{1,38}$"
+        },
+        "name": {
+          "type": "string"
+        },
+        "public_key": {
+          "type": "string",
+          "minLength": 1
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        }
+      }
+    },
+    "entry": {
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "product",
+        "kind",
+        "author",
+        "description",
+        "version",
+        "url",
+        "sha256",
+        "licence",
+        "native",
+        "permissions"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]{1,63}$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "product": {
+          "enum": [
+            "formvis",
+            "formcut",
+            "formwav",
+            "formpdf",
+            "formdeck",
+            "formlit",
+            "formmd",
+            "formencoder",
+            "formvfx",
+            "formmcp",
+            "formtray",
+            "formskills",
+            "formportal"
+          ]
+        },
+        "kind": {
+          "$ref": "package.schema.json#/$defs/kind"
+        },
+        "author": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+        },
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https://"
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "bytes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "licence": {
+          "type": "string",
+          "minLength": 1
+        },
+        "minimum_app": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+        },
+        "native": {
+          "type": "boolean"
+        },
+        "permissions": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "package.schema.json#/$defs/permission"
+          }
+        },
+        "signature": {
+          "$ref": "#/$defs/signature"
+        },
+        "support": {
+          "type": "string",
+          "pattern": "^https://"
+        },
+        "homepage": {
+          "type": "string",
+          "pattern": "^https://"
+        },
+        "api": {
+          "const": "1"
+        },
+        "verified": {
+          "type": "boolean"
+        },
+        "registry_commit": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "source": {
+          "type": "string",
+          "pattern": "^https://"
+        }
+      },
+      "if": {
+        "properties": {
+          "native": {
+            "const": true
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "signature"
+        ]
+      }
+    },
+    "signature": {
+      "type": "object",
+      "required": [
+        "publisher",
+        "algorithm",
+        "value"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "publisher": {
+          "type": "string"
+        },
+        "algorithm": {
+          "const": "ed25519"
+        },
+        "value": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

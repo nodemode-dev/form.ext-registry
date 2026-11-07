@@ -1,0 +1,10 @@
+{
+  "publishers": [
+    {
+      "id": "nodemode",
+      "name": "nodemode",
+      "public_key": "",
+      "url": "https://formai.studio"
+    }
+  ]
+}
