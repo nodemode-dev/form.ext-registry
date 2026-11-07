@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Tool Diff</title>
+    <link rel="stylesheet" href="tool-diff.css" />
+  </head>
+  <body>
+    <main class="td" id="app" data-busy="false" data-ready="false">
+      <div class="line">
+        <label class="pick grow"><span class="lbl">App</span>
+          <select id="app-pick" aria-label="App" disabled><option value="">Reading formMCP&hellip;</option></select>
+        </label>
+        <button type="button" class="btn" id="snap" disabled title="Keep formMCP's current tool list for this app as a snapshot">Snapshot</button>
+        <button type="button" class="btn" id="load" disabled title="Start the app once so formMCP lists its tools again">Load from App</button>
+      </div>
+
+      <div class="line pair">
+        <label class="pick"><span class="lbl">Before</span>
+          <select id="before" aria-label="Before" disabled><option value="">No snapshot yet</option></select>
+        </label>
+        <button type="button" class="icon" id="swap" aria-label="Swap before and after" title="Swap before and after" disabled>
+          <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M3 5h9m0 0-2.5-2.5M12 5 9.5 7.5M13 11H4m0 0 2.5-2.5M4 11l2.5 2.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <label class="pick"><span class="lbl">After</span>
+          <select id="after" aria-label="After" disabled><option value="now">Now</option></select>
+        </label>
+      </div>
+
+      <div class="line">
+        <button type="button" class="btn btn-small" id="import" disabled title="Open a saved tools/list answer, a formMCP tool list or a Tool Diff report">
+          <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M8 2v8m0 0L5 7m3 3 3-3M3 11v2h10v-2" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Import&hellip;
+        </button>
+        <button type="button" class="btn btn-small" id="forget" disabled title="Delete the Before snapshot">Forget</button>
+        <span class="grow"></span>
+        <button type="button" class="btn btn-small" id="save-html" disabled>Save HTML</button>
+        <button type="button" class="btn btn-small" id="save-json" disabled>Save JSON</button>
+      </div>
+
+      <div class="chips" role="group" aria-label="Show">
+        <button type="button" class="chip" aria-pressed="true" data-filter="all">All <span class="n" data-count="all">0</span></button>
+        <button type="button" class="chip" aria-pressed="false" data-filter="breaking">Breaking <span class="n" data-count="breaking">0</span></button>
+        <button type="button" class="chip" aria-pressed="false" data-filter="changed">Changed <span class="n" data-count="changed">0</span></button>
+        <button type="button" class="chip" aria-pressed="false" data-filter="added">Added <span class="n" data-count="added">0</span></button>
+        <button type="button" class="chip" aria-pressed="false" data-filter="removed">Removed <span class="n" data-count="removed">0</span></button>
+      </div>
+
+      <p class="summary" id="summary">&nbsp;</p>
+      <div class="list" id="list" role="list" aria-label="Differences">
+        <p class="empty" id="empty">Reading formMCP&hellip;</p>
+      </div>
+
+      <div class="foot">
+        <div class="meter" id="meter" aria-hidden="true"><span id="meter-fill"></span></div>
+        <p class="status" id="status" role="status">&nbsp;</p>
+        <button type="button" class="btn btn-small" id="stop">Stop</button>
+      </div>
+    </main>
+    <script type="module" src="tool-diff.js"></script>
+  </body>
+</html>
