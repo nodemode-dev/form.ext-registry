@@ -1,5 +1,11 @@
 # HASHOUT LOG
 
+## v0.1.1
+
+Headless race, found by the formlit integrator: a headless Tag Light Keywords started its own `load()` while the page's start-up `load()` (after `host.hello`) was still due, and the newer run superseded the command's, so the command saw an empty selection and answered "select photos first" (seen from the menu and from the MCP `extension_command`, depending on timing). The start-up is now the `booted` promise; the command waits for it, loads, then waits while any newer load (a `selection.changed` reload) is still busy before writing.
+
+`tools/formpkg.py` copied again from the updated kit (it now requires `api` "1" and refuses native packages); the package was valid under both.
+
 ## v0.1.0
 
 Why Golden Hour: FormLit has GPS, a Map module, keywords and capture times, but nothing that says what the light was. The only "golden hour" and "blue hour" strings in the app are preset names; there is no sun, moon, twilight or azimuth code in the engine, the interface, the command catalogue or the MCP tools. The Palette candidate was set aside: Golden Hour is pure maths with no image decoding in the sandbox, and it uses FormLit's location data, which the app collects but does little with.

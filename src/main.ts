@@ -379,7 +379,9 @@ formext.onActivate(async (act) => {
   if (act.reason !== 'command') return null;
   if (act.command === 'tag-selected') {
     try {
+      await booted;
       await load();
+      while (state.busy) await new Promise((r) => setTimeout(r, 50));
       const out = await writeKeywords(true);
       const ok = state.results.filter((r) => r.ok).length;
       const skipped = state.results.length - ok;
@@ -403,7 +405,7 @@ wire();
 renderList();
 renderDetail();
 
-(async () => {
+const booted = (async () => {
   try {
     const hello = await formext.hello();
     state.canWrite = hello.permissions.includes('document');
