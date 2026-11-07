@@ -6,8 +6,8 @@ FormCut's own API page (document snapshot, commands, events) is `docs/EXTENSIONS
 
 ## Layout
 
-- `package/` is exactly what goes into the `.formpkg`: `manifest.json`, `ui/index.html`, `ui/shot-list.css` and the
-  built `ui/shot-list.js`.
+- `package/` is exactly what goes into the `.formpkg`: `manifest.json`, `ui/index.html` (markup and the whole
+  stylesheet, inline) and the built `ui/shot-list.js`.
 - `src/` is the TypeScript source. `src/formext.ts` is the kit's SDK, vendored unchanged; adapt by wrapping it.
 - `tools/formpkg.py` is the kit's packager, vendored unchanged.
 - `npm run build` type-checks and bundles `src/main.ts` into `package/ui/shot-list.js`; `npm run package` writes
