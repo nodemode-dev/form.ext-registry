@@ -1,0 +1,25 @@
+{
+  "format": "formai-package",
+  "format_version": 1,
+  "id": "shot-list",
+  "name": "Shot List",
+  "product": "formcut",
+  "kind": "script-plugin",
+  "version": "0.1.0",
+  "author": "nodemode",
+  "licence": "Apache-2.0",
+  "native": false,
+  "permissions": ["document", "files-read", "files-write"],
+  "minimum_app": "2.14.0",
+  "api": "1",
+  "description": "A shot list and storyboard sheet for the active timeline: one frame per picture clip with its shot number, timecodes, name and your notes, saved as a printable PDF or a PNG sheet. Notes can be dropped onto the timeline as markers in one undo step.",
+  "entry": { "ui": "ui/index.html" },
+  "contributes": {
+    "panels": [{ "id": "main", "title": "Shot List", "location": "dock" }],
+    "commands": [
+      { "id": "open", "title": "Open Shot List", "panel": "main" },
+      { "id": "save-pdf", "title": "Save Shot List as PDF" }
+    ]
+  },
+  "homepage": "https://formai.studio/extensions/#shot-list"
+}
