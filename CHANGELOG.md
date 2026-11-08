@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.3 (2026-11-08)
+
+- `CODE_OF_CONDUCT.md` and `CONTRIBUTING.md`, which separates submitting or updating an extension, reporting one,
+  changing the registry's own checks, signing and workflows, and changing the contract (the kit first). `SECURITY.md`
+  says what is supported and what counts as a security problem here, and the README links all three.
+
 ## 0.1.2 (2026-11-08)
 
 - The README shows the registry's icon, light or dark to follow the reader's GitHub theme (`assets/`), and says the
