@@ -78,6 +78,14 @@ python3 tools/build_index.py                 # dist/: packages, extensions.json,
 seeds). The checks build each extension with `npm ci && npm run build`, so they need Node; `--skip-npm` leaves that
 step out for a quick local run.
 
+## Contributing
+
+Most contributions are extensions: add yours as `extensions/<id>/` in a pull request ([SUBMITTING.md](SUBMITTING.md),
+[POLICY.md](POLICY.md)). Changes to the registry's own tools, workflows and docs are welcome too, with more care,
+and changes to the contract go to the Form Extension Contract kit first. [CONTRIBUTING.md](CONTRIBUTING.md) says which
+is which, [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) how we treat each other, and [SECURITY.md](SECURITY.md) how to
+report a harmful extension privately.
+
 ## Licence
 
 The registry's own files are under the Apache License 2.0 ([LICENSE](LICENSE)). Each extension carries its own
