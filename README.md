@@ -1,3 +1,11 @@
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/registry-icon-dark.png">
+    <source media="(prefers-color-scheme: light)" srcset="assets/registry-icon-light.png">
+    <img src="assets/registry-icon-dark.png" width="128" height="128" alt="Form Extension Registry icon: four puzzle pieces as a tile, one lifted out in the extension colours">
+  </picture>
+</p>
+
 # Form Extension Registry
 
 The single source of officially registered extensions for the Form apps (FormVis, FormCut, FormWav, FormPDF,
@@ -5,8 +13,8 @@ FormDeck, FormLit, Form.md, FormEncoder, FormVFX, FormMCP, FormTray, FormSkills)
 whole source project under `extensions/<id>/`. A push to `main` builds each one into a deterministic `.formpkg`,
 signs it, and publishes a signed index that FormPortal, form.ext and formai.studio read.
 
-The repository is private while it is being tested. It will be public later; until then every download URL below
-needs a GitHub token, and the apps say so plainly when a download is refused.
+The repository is public. Until the owners add the signing keys (see [KEYS.md](KEYS.md)), nothing is published
+yet, and the apps say so plainly when the index or a download is refused.
 
 ## How an extension gets in
 

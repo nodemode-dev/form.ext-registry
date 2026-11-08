@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.2 (2026-11-08)
+
+- The README shows the registry's icon, light or dark to follow the reader's GitHub theme (`assets/`), and says the
+  repository is public. Publishing skips with a notice until the signing keys are set (#1).
+
 ## 0.1.1 (2026-11-07)
 
 - Check 5 (permissions) skips the Form Extension SDK build an extension ships unchanged as `ui/formext.js`, listed by
