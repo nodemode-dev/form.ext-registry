@@ -1,0 +1,12 @@
+{
+  "name": "grid-overlay",
+  "version": "0.1.1",
+  "private": true,
+  "description": "Editable drawing grids over your art in FormVis, exported print-ready for transferring to canvas.",
+  "license": "Apache-2.0",
+  "author": "nodemode-ai <mackin@nodemode.ai>",
+  "type": "module",
+  "scripts": {
+    "build": "node tools/build.mjs"
+  }
+}

@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <title>Grid Overlay</title>
+    <link rel="stylesheet" href="grid.css" />
+  </head>
+  <body>
+    <main>
+      <div class="doc" id="sub">&nbsp;</div>
+
+      <div class="mode" id="mode" data-editing="false">
+        <span class="mode-text" id="mode-text">New grid</span>
+        <button class="small" id="new" type="button" title="Add a new grid instead of updating this one">New</button>
+      </div>
+
+      <details open>
+        <summary>Grid</summary>
+        <div class="body">
+          <div class="f">
+            <span>Type</span>
+            <div class="sel">
+              <select data-k="type">
+                <option value="thirds">Rule of thirds</option>
+                <option value="square">Square grid</option>
+                <option value="phi">Golden ratio</option>
+                <option value="triangle">Triangular / isometric</option>
+                <option value="radial">Radial / center lines</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="f" data-show="size">
+            <span>Size by</span>
+            <div class="seg">
+              <label><input type="radio" name="sizeMode" data-k="sizeMode" value="cells" />Cell count</label>
+              <label><input type="radio" name="sizeMode" data-k="sizeMode" value="print" />Print size</label>
+            </div>
+          </div>
+          <div class="f" data-show="size cells">
+            <span>Columns</span>
+            <label class="num"><input data-k="cols" type="number" min="1" max="500" step="1" /><i>cells</i></label>
+          </div>
+          <div class="f" data-show="size cells rows">
+            <span>Rows</span>
+            <label class="num"><input data-k="rows" type="number" min="1" max="500" step="1" /><i>cells</i></label>
+          </div>
+          <div class="f" data-show="size print">
+            <span>Print width</span>
+            <label class="num"><input data-k="printWidth" type="number" min="0.1" step="0.25" /><i data-unit></i></label>
+          </div>
+          <div class="f" data-show="size print">
+            <span>Cell size</span>
+            <label class="num"><input data-k="cellSize" type="number" min="0.05" step="0.25" /><i data-unit></i></label>
+          </div>
+          <div class="f" data-show="size print">
+            <span>Unit</span>
+            <div class="seg">
+              <label><input type="radio" name="unit" data-k="unit" value="in" />Inches</label>
+              <label><input type="radio" name="unit" data-k="unit" value="cm" />Centimeters</label>
+            </div>
+          </div>
+          <label class="check" data-show="size cells square-only"><input data-k="square" type="checkbox" />Square cells</label>
+          <label class="check" data-show="size square-only"><input data-k="center" type="checkbox" />Center the grid</label>
+
+          <div class="f" data-show="radial">
+            <span>Spokes</span>
+            <label class="num"><input data-k="radial.spokes" type="number" min="2" max="360" step="1" /></label>
+          </div>
+          <div class="f" data-show="radial">
+            <span>Rings</span>
+            <label class="num"><input data-k="radial.rings" type="number" min="0" max="200" step="1" /></label>
+          </div>
+
+          <div class="hint" id="print-hint"></div>
+        </div>
+      </details>
+
+      <details open>
+        <summary>Lines</summary>
+        <div class="body">
+          <div class="f">
+            <span>Color</span>
+            <label class="swatch"><input data-k="stroke.color" type="color" /><i id="stroke-hex"></i></label>
+          </div>
+          <div class="f">
+            <span>Width</span>
+            <label class="num"><input data-k="stroke.width" type="number" min="0.25" max="500" step="0.5" /><i>px</i></label>
+          </div>
+          <div class="f">
+            <span>Opacity</span>
+            <div class="slide">
+              <input data-k="stroke.opacity" type="range" min="0.05" max="1" step="0.05" />
+              <output id="opacity-out">80 %</output>
+            </div>
+          </div>
+          <div class="f">
+            <span>Style</span>
+            <div class="seg">
+              <label><input type="radio" name="style" data-k="stroke.style" value="solid" />Solid</label>
+              <label><input type="radio" name="style" data-k="stroke.style" value="dashed" />Dashed</label>
+              <label><input type="radio" name="style" data-k="stroke.style" value="dotted" />Dotted</label>
+            </div>
+          </div>
+          <label class="check" data-show="major"><input data-k="major.on" type="checkbox" />Major / minor lines</label>
+          <div class="f" data-show="major major-on">
+            <span>Major every</span>
+            <label class="num"><input data-k="major.every" type="number" min="2" max="100" step="1" /><i>lines</i></label>
+          </div>
+          <div class="f" data-show="major major-on">
+            <span>Major width</span>
+            <label class="num"><input data-k="major.mult" type="number" min="1" max="20" step="0.5" /><i>×</i></label>
+          </div>
+        </div>
+      </details>
+
+      <details open>
+        <summary>Extras</summary>
+        <div class="body">
+          <label class="check" data-show="cells-type"><input data-k="diagonals" type="checkbox" />Diagonals in each cell</label>
+          <label class="check" data-show="cells-type"><input data-k="labels" type="checkbox" />Cell labels (A B C / 1 2 3)</label>
+          <label class="check"><input data-k="edge" type="checkbox" />Outline the edge</label>
+          <label class="check"><input data-k="border.on" type="checkbox" />Border</label>
+          <div class="f" data-show="border-on">
+            <span>Border color</span>
+            <label class="swatch"><input data-k="border.color" type="color" /><i id="border-hex"></i></label>
+          </div>
+          <div class="f" data-show="border-on">
+            <span>Border width</span>
+            <label class="num"><input data-k="border.width" type="number" min="0" step="1" /><i id="border-unit">px</i></label>
+          </div>
+        </div>
+      </details>
+
+      <div class="actions">
+        <button class="primary" id="apply" type="button">Add Grid Overlay</button>
+        <button id="delete" type="button" hidden>Delete Grid</button>
+      </div>
+
+      <details open>
+        <summary>Print</summary>
+        <div class="body">
+          <label class="check"><input data-k="grayscale" type="checkbox" />Also save a grayscale value copy</label>
+          <div class="actions">
+            <button id="export" type="button">Export for Print…</button>
+          </div>
+        </div>
+      </details>
+
+      <div id="status">&nbsp;</div>
+    </main>
+    <script type="module" src="app.js"></script>
+  </body>
+</html>
