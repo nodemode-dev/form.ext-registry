@@ -1,0 +1,43 @@
+{
+  "format": "formai-package",
+  "format_version": 1,
+  "id": "grid-overlay",
+  "name": "Grid Overlay",
+  "product": "formvis",
+  "kind": "script-plugin",
+  "version": "0.1.1",
+  "author": "nodemode-ai",
+  "licence": "Apache-2.0",
+  "native": false,
+  "permissions": [
+    "document",
+    "files-write"
+  ],
+  "api": "1",
+  "description": "Add editable drawing grids (rule of thirds, square, golden ratio, triangular, radial) over your art as their own layers, then export a print-ready copy for transferring to canvas.",
+  "entry": {
+    "ui": "ui/index.html"
+  },
+  "contributes": {
+    "panels": [
+      {
+        "id": "main",
+        "title": "Grid Overlay",
+        "location": "dock"
+      }
+    ],
+    "commands": [
+      {
+        "id": "grid-settings",
+        "title": "Grid Overlay Settings",
+        "panel": "main"
+      },
+      {
+        "id": "add-grid",
+        "title": "Add Grid Overlay"
+      }
+    ]
+  },
+  "minimum_app": "2.1.1",
+  "homepage": "https://formai.studio/extensions/#grid-overlay"
+}

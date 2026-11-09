@@ -1,0 +1,393 @@
+/* Laid out like formvis's own inspector panels: collapsible sections,
+   label left / control right rows, unit suffixes inside number fields. */
+:root {
+  --bg: #111111;
+  --panel: #17151b;
+  --panel-2: #222026;
+  --text: #f2f2f2;
+  --muted: #9a9aa2;
+  --accent: #f08a24;
+  --accent-text: #ffffff;
+  --border: #2e2c33;
+  --radius: 6px;
+  --danger: #ff5a5a;
+  --field: color-mix(in srgb, var(--bg) 70%, var(--panel));
+  --row: 30px;
+  color-scheme: dark;
+}
+:root[data-theme="light"] {
+  color-scheme: light;
+  --field: color-mix(in srgb, var(--bg) 85%, var(--panel));
+}
+* {
+  box-sizing: border-box;
+}
+[hidden] {
+  display: none !important;
+}
+html,
+body {
+  margin: 0;
+  overflow: hidden; /* the frame is sized to the content (ui.resize), so no inner scrollbar */
+  background: var(--panel);
+  color: var(--text);
+  font: 13px/1.4 var(--font-ui, system-ui, -apple-system, "Segoe UI", sans-serif);
+  -webkit-font-smoothing: antialiased;
+}
+main {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px 12px 12px;
+}
+
+/* Document line and edit-mode bar */
+.doc {
+  color: var(--muted);
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mode {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: var(--row);
+  padding: 0 4px 0 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--field);
+  color: var(--muted);
+  font-size: 12px;
+}
+.mode-text {
+  flex: 1 1 auto;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mode[data-editing="true"] {
+  border-color: var(--accent);
+  color: var(--text);
+}
+.mode[data-editing="false"] #new {
+  display: none;
+}
+
+/* Sections */
+details {
+  border-top: 1px solid var(--border);
+  padding-top: 8px;
+}
+summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 24px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+summary::-webkit-details-marker {
+  display: none;
+}
+summary::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  margin: 0 3px 3px 2px;
+  border-right: 1.5px solid var(--muted);
+  border-bottom: 1.5px solid var(--muted);
+  transform: rotate(45deg);
+  transition: transform 120ms ease;
+}
+details:not([open]) summary::before {
+  transform: rotate(-45deg);
+  margin: 0 3px 0 0;
+}
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 0 4px;
+}
+
+/* A row: label left, control right */
+.f {
+  display: grid;
+  grid-template-columns: minmax(78px, 34%) minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  min-height: var(--row);
+}
+.f > span {
+  color: var(--muted);
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Fields */
+input,
+select,
+button {
+  font: inherit;
+  color: var(--text);
+}
+.num,
+.sel,
+.swatch {
+  display: flex;
+  align-items: center;
+  height: var(--row);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--field);
+  min-width: 0;
+}
+.num:focus-within,
+.sel:focus-within {
+  border-color: var(--accent);
+}
+.num input {
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+  padding: 0 4px 0 10px;
+  border: 0;
+  background: transparent;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  outline: none;
+  -moz-appearance: textfield;
+}
+.num input::-webkit-inner-spin-button,
+.num input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.num i {
+  flex: none;
+  padding-right: 10px;
+  color: var(--muted);
+  font-style: normal;
+  font-size: 12px;
+}
+.num i:empty {
+  padding-right: 6px;
+}
+.sel {
+  position: relative;
+}
+.sel select {
+  width: 100%;
+  height: 100%;
+  padding: 0 28px 0 10px;
+  border: 0;
+  background: transparent;
+  appearance: none;
+  -webkit-appearance: none;
+  outline: none;
+  cursor: pointer;
+}
+.sel select option {
+  background: var(--panel);
+  color: var(--text);
+}
+.sel::after {
+  content: "";
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  margin-top: -5px;
+  border-right: 1.5px solid var(--muted);
+  border-bottom: 1.5px solid var(--muted);
+  transform: rotate(45deg);
+  pointer-events: none;
+}
+.swatch {
+  gap: 8px;
+  padding: 0 10px 0 4px;
+  cursor: pointer;
+}
+.swatch input {
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: none;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.swatch input::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+.swatch input::-webkit-color-swatch {
+  border: 0;
+  border-radius: 3px;
+}
+.swatch i {
+  font-style: normal;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+/* Slider with its value, as in Brush Settings */
+.slide {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 56px;
+  align-items: center;
+  gap: 8px;
+}
+.slide input {
+  width: 100%;
+  margin: 0;
+  accent-color: var(--accent);
+}
+.slide output {
+  height: var(--row);
+  line-height: calc(var(--row) - 2px);
+  padding: 0 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--field);
+  text-align: right;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Segmented choice, as in the Navigator's zoom presets */
+.seg {
+  display: flex;
+  height: var(--row);
+  padding: 2px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--field);
+  min-width: 0;
+}
+.seg label {
+  flex: 1 1 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  border-radius: calc(var(--radius) - 2px);
+  font-size: 12px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+.seg input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.seg label:has(input:checked) {
+  background: var(--panel-2);
+  color: var(--text);
+  box-shadow: 0 0 0 1px var(--border);
+}
+.seg label:has(input:focus-visible) {
+  outline: 1px solid var(--accent);
+}
+
+/* Checkbox rows, as Show Transform Controls */
+.check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 26px;
+  font-size: 13px;
+  cursor: pointer;
+}
+.check input {
+  width: 15px;
+  height: 15px;
+  margin: 0;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+/* Buttons */
+button {
+  height: var(--row);
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: transparent;
+  white-space: nowrap;
+  cursor: pointer;
+}
+button:hover:not(:disabled) {
+  border-color: var(--muted);
+}
+button.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-text, #ffffff);
+  font-weight: 600;
+}
+button.primary:hover:not(:disabled) {
+  border-color: var(--accent);
+  filter: brightness(1.08);
+}
+button.small {
+  flex: none;
+  height: 22px;
+  padding: 0 10px;
+  font-size: 12px;
+}
+button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+#delete:hover:not(:disabled) {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+.actions {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: 8px;
+}
+.actions:has(#delete:not([hidden])) {
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+}
+
+/* Text */
+.hint,
+#status {
+  min-height: 1.4em;
+  color: var(--muted);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.hint:empty {
+  display: none;
+}
+#status[data-level="error"] {
+  color: var(--danger);
+}
+#status[data-level="success"] {
+  color: var(--text);
+}
+.mode-text b {
+  font-weight: 600;
+  color: var(--text);
+}
