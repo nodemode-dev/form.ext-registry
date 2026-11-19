@@ -12,9 +12,9 @@ PRODUCTS = ["formvis", "formcut", "formwav", "formpdf", "formdeck", "formlit", "
 KINDS = ["effect-stack", "wgsl-kernel", "audio-chain", "caption-look", "lut", "timeline-template", "script-plugin", "action-set", "preset", "theme", "native-plugin"]
 PERMISSIONS = ["document", "files-read", "files-write", "network", "models", "native-code"]
 TYPES = {".html", ".js", ".mjs", ".css", ".json", ".svg", ".png", ".webp", ".jpg", ".jpeg", ".gif", ".wasm", ".txt", ".md", ".wav", ".ogg", ".mp3", ".webm", ".mp4", ".cube", ".woff2"}
-ID_RE = re.compile(r"^[a-z0-9][a-z0-9-]{1,63}$")
-LOCAL_RE = re.compile(r"^[a-z0-9][a-z0-9-]{0,31}$")
-VERSION_RE = re.compile(r"^[0-9]+\.[0-9]+\.[0-9]+$")
+ID_RE = re.compile(r"^[a-z0-9][a-z0-9-]{1,63}\Z")
+LOCAL_RE = re.compile(r"^[a-z0-9][a-z0-9-]{0,31}\Z")
+VERSION_RE = re.compile(r"^[0-9]+\.[0-9]+\.[0-9]+\Z")
 MAX_BYTES = 20 * 1024 * 1024
 MAX_FILES = 512
 SKIP = {".DS_Store", "Thumbs.db"}
@@ -81,7 +81,7 @@ def problems(folder: Path) -> tuple[list[str], dict]:
             out.append(f"manifest.json: command {c.get('id')!r} names panel {c['panel']!r}, which is not contributed")
     if (contributes.get("panels") or contributes.get("commands")) and not entry:
         out.append("manifest.json: entry.ui is required when panels or commands are contributed")
-    if entry and not (folder / entry).is_file():
+    if entry and ("\\" in str(entry) or str(entry).rsplit("/", 1)[-1] in ("", ".") or Path(entry).as_posix() not in {p.relative_to(folder).as_posix() for p in files_of(folder)[0]}):
         out.append(f"manifest.json: entry.ui {entry} is not a file in the folder")
     return out, m
 

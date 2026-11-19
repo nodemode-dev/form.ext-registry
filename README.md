@@ -9,12 +9,13 @@
 # Form Extension Registry
 
 The single source of officially registered extensions for the Form apps (FormVis, FormCut, FormWav, FormPDF,
-FormDeck, FormLit, Form.md, FormEncoder, FormVFX, FormMCP, FormTray, FormSkills). Every extension lives here as a
+FormDeck, FormLit, Form.md, FormEncoder, FormVFX, formMCP, FormTray, formskills). Every extension lives here as a
 whole source project under `extensions/<id>/`. A push to `main` builds each one into a deterministic `.formpkg`,
 signs it, and publishes a signed index that FormPortal, form.ext and formai.studio read.
 
-The repository is public. Until the owners add the signing keys (see [KEYS.md](KEYS.md)), nothing is published
-yet, and the apps say so plainly when the index or a download is refused.
+The repository is public and the signed index is published (see "Where the index lives" below). The signing keys are
+repository secrets ([KEYS.md](KEYS.md)); when they are not set, the `publish` workflow says so and publishes nothing,
+and the apps say so plainly when the index or a download is refused.
 
 ## How an extension gets in
 
@@ -59,7 +60,9 @@ extensions/<id>/            one extension: package/ (exactly what ships), src/, 
 registry/blocklist.json     blocked ids and versions
 registry/publishers.json    publisher public keys, copied into the index
 contract/                   the Form Extension Contract kit, vendored unchanged
+contract.sha256             the SHA-256 of every file of the kit copy
 tools/check.py              the pull request checks
+tools/check_kit.py          fails when the kit copy does not match contract.sha256
 tools/build_index.py        builds, signs and indexes every package into dist/
 tools/new_signing_key.py    makes an Ed25519 key pair
 ```
@@ -71,6 +74,7 @@ pip install -r tools/requirements.txt
 python3 tools/check.py --all                 # every extension
 python3 tools/check.py --changed             # what this branch changes against origin/main
 python3 tools/check.py extensions/shot-list  # one folder
+python3 tools/check_kit.py                   # the contract kit copy against contract.sha256
 python3 tools/build_index.py                 # dist/: packages, extensions.json, blocklist.json (unsigned without keys)
 ```
 

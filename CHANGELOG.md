@@ -1,5 +1,17 @@
 # Changelog
 
+## Unreleased
+
+- The contract kit copy is brought up to date with form.ext: `contract/tools/formpkg.py` and
+  `contract/host/python/formext_host.py` now reject an id, version or `entry.ui` that the host refuses (a trailing
+  newline, a backslash, an `entry.ui` that is not exactly a package file). No published package or index entry changed.
+- `contract.sha256` lists the SHA-256 of every file of the kit copy, and `tools/check_kit.py` fails when the copy does
+  not match it. The `verify` workflow runs it before the extension checks.
+- README and KEYS.md say the registry is published and the keys exist, and spell formMCP and formskills as the Form
+  family's host list does.
+- Added since 0.1.3 and not recorded here before: grid-overlay 0.1.1 (#4) and the `nodemode` publisher public key in
+  `registry/publishers.json` (#5).
+
 ## 0.1.3 (2026-11-08)
 
 - `CODE_OF_CONDUCT.md` and `CONTRIBUTING.md`, which separates submitting or updating an extension, reporting one,
