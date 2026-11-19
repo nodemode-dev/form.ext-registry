@@ -11,8 +11,11 @@ public halves are committed where readers need them.
 Both secrets are base64 of the raw 32-byte Ed25519 seed. Signatures are base64 of the 64-byte Ed25519 signature
 over the exact bytes of the file, which is what FormPortal's `core/src/signature.rs` `verify()` checks.
 
-Until the owners do the steps below, the key files hold comment lines only, and every client refuses the registry
-index with "this build trusts no registry key yet" unless its developer setting allows unsigned indexes.
+Both key pairs exist and the registry is published: the publisher public key is in `registry/publishers.json` and the
+registry public key is in the client key files listed in step 3. Steps 1 to 4 below are how the keys were made and
+what to repeat only when a key is replaced (see "Replacing a key"); running step 1 and step 2 on the live registry
+replaces the live keys. A client whose key file holds no registry key refuses the index with "this build trusts no
+registry key yet" unless its developer setting allows unsigned indexes.
 
 ## 1. Make the two key pairs
 

@@ -9,12 +9,13 @@
 # Form Extension Registry
 
 The single source of officially registered extensions for the Form apps (FormVis, FormCut, FormWav, FormPDF,
-FormDeck, FormLit, Form.md, FormEncoder, FormVFX, FormMCP, FormTray, FormSkills). Every extension lives here as a
+FormDeck, FormLit, Form.md, FormEncoder, FormVFX, formMCP, FormTray, formskills). Every extension lives here as a
 whole source project under `extensions/<id>/`. A push to `main` builds each one into a deterministic `.formpkg`,
 signs it, and publishes a signed index that FormPortal, form.ext and formai.studio read.
 
-The repository is public. Until the owners add the signing keys (see [KEYS.md](KEYS.md)), nothing is published
-yet, and the apps say so plainly when the index or a download is refused.
+The repository is public and the signed index is published (see "Where the index lives" below). The signing keys are
+repository secrets ([KEYS.md](KEYS.md)); when they are not set, the `publish` workflow says so and publishes nothing,
+and the apps say so plainly when the index or a download is refused.
 
 ## How an extension gets in
 
