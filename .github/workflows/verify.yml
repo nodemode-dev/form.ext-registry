@@ -23,6 +23,8 @@ jobs:
         run: pip install -r tools/requirements.txt
       - name: Make origin/main the base of the comparison
         run: git fetch --no-tags origin "+refs/heads/main:refs/remotes/origin/main"
+      - name: Check the contract kit copy against its hash list
+        run: python tools/check_kit.py
       - name: Check the changed extensions
         env:
           GH_TOKEN: ${{ github.token }}

@@ -60,7 +60,9 @@ extensions/<id>/            one extension: package/ (exactly what ships), src/, 
 registry/blocklist.json     blocked ids and versions
 registry/publishers.json    publisher public keys, copied into the index
 contract/                   the Form Extension Contract kit, vendored unchanged
+contract.sha256             the SHA-256 of every file of the kit copy
 tools/check.py              the pull request checks
+tools/check_kit.py          fails when the kit copy does not match contract.sha256
 tools/build_index.py        builds, signs and indexes every package into dist/
 tools/new_signing_key.py    makes an Ed25519 key pair
 ```
@@ -72,6 +74,7 @@ pip install -r tools/requirements.txt
 python3 tools/check.py --all                 # every extension
 python3 tools/check.py --changed             # what this branch changes against origin/main
 python3 tools/check.py extensions/shot-list  # one folder
+python3 tools/check_kit.py                   # the contract kit copy against contract.sha256
 python3 tools/build_index.py                 # dist/: packages, extensions.json, blocklist.json (unsigned without keys)
 ```
 

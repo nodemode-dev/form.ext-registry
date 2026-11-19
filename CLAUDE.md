@@ -14,7 +14,9 @@ tools, never copied.
 - `registry/publishers.json`: the publisher keys copied into the index. Public keys only.
 - `tools/`: `check.py`, `build_index.py`, `new_signing_key.py`, Python 3 standard library plus `cryptography`
   (pinned in `tools/requirements.txt`).
-- `contract/`: the kit, identical to its source. Update it only by copying the whole kit again.
+- `contract/`: the kit, identical to its source. Update it only by copying the whole kit again, then
+  `python3 tools/check_kit.py --print` gives the new lines for `contract.sha256`, which `tools/check_kit.py` (run by
+  the `verify` workflow) checks the copy against.
 
 ## Laws
 
