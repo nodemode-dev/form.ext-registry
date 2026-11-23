@@ -246,7 +246,7 @@ test('base64 helpers match node Buffer encoding across the chunk boundary and fo
   const big = new Uint8Array(0x8000 * 2 + 5).map((_, i) => (i * 7) & 255);
   assert.equal(sdk.toBase64(big), Buffer.from(big).toString('base64'));
   assert.deepEqual(sdk.fromBase64(Buffer.from(big).toString('base64')), big);
-  assert.equal(sdk.textToBase64('grid é ✓'), Buffer.from('grid é ✓', 'utf8').toString('base64'));
+  assert.equal(sdk.textToBase64('grid é \u{2713}'), Buffer.from('grid é \u{2713}', 'utf8').toString('base64'));
   assert.equal(sdk.toBase64(new Uint8Array([1, 2, 3])), 'AQID');
   assert.equal(image.toBase64, sdk.toBase64);
   assert.equal(image.fromBase64, sdk.fromBase64);

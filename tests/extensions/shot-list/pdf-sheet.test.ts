@@ -109,7 +109,7 @@ test('text width of Wai at 10 pt is 17.22 pt', () => {
   assert.equal(winAnsi('—'), 151);
   assert.equal(winAnsi('’'), 146);
   assert.equal(winAnsi('中'), 63);
-  assert.equal(winAnsi('😀'), 63);
+  assert.equal(winAnsi('\u{1F600}'), 63);
   assert.equal(winAnsi('\n'), 63);
   assert.equal(textWidth('中', 10, false), 5.56);
 });
@@ -454,7 +454,7 @@ test('parentheses and backslashes in text are escaped', () => {
 });
 
 test('text outside the encoding prints as question marks and specials as octal codes', () => {
-  const doc = latin(buildPdf([simplePage([textOp('日本 ok 😀 € – é\n')])], () => undefined, 'Tïtle 日'));
+  const doc = latin(buildPdf([simplePage([textOp('日本 ok \u{1F600} € – é\n')])], () => undefined, 'Tïtle 日'));
   const [stream] = contentStreams(doc);
   assert.ok(stream.includes('(?? ok ? \\200 \\226 \\351?) Tj'));
   assert.ok(doc.includes('/Title (T\\357tle ?)'));
