@@ -1,7 +1,13 @@
 # Changelog
 
-## Unreleased
+## 0.2.0 (2026-11-23)
 
+- A test suite. `tests/` holds pytest tests of `tools/` and of the kit's Python (`formpkg.py`, `formext_host.py`), and
+  Node tests of the kit's bridge and SDK and of the modules of all thirteen extensions: 1,912 cases, run by the new
+  `tests` workflow on every pull request and on `main`. The tests sit outside `extensions/` and `contract/`, so no
+  extension's bytes and no kit file changed and no extension's version moves. A test that shows a fault is kept and
+  marked as an expected failure (48 in pytest, 35 in Node); `tests/README.md` says how to run them and what a test
+  must do.
 - The contract kit copy is brought up to date with form.ext: `contract/tools/formpkg.py` and
   `contract/host/python/formext_host.py` now reject an id, version or `entry.ui` that the host refuses (a trailing
   newline, a backslash, an `entry.ui` that is not exactly a package file). No published package or index entry changed.
