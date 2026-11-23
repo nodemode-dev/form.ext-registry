@@ -1,0 +1,33 @@
+name: tests
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      GIT_AUTHOR_NAME: tests
+      GIT_AUTHOR_EMAIL: tests@example.invalid
+      GIT_COMMITTER_NAME: tests
+      GIT_COMMITTER_EMAIL: tests@example.invalid
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install the tools' and the tests' requirements
+        run: pip install -r tools/requirements.txt -r tests/requirements.txt
+      - name: Python tests of the tools, the contract kit and the registry's data
+        run: python -m pytest
+      - name: Node tests of the contract kit and the extensions' modules
+        run: node --experimental-transform-types --import ./tests/ts/register.mjs --test "tests/**/*.test.ts" "tests/**/*.test.mjs"
