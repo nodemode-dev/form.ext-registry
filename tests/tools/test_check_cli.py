@@ -1,4 +1,5 @@
 import argparse
+import hashlib
 import json
 import os
 import re
@@ -10,7 +11,6 @@ import pytest
 FOCUS = "focus-timer"
 GRID = "grid-overlay"
 FOCUS_VERSION = "0.1.0"
-FOCUS_SHA = "d1e72e664e6bde8b2fe4e7b5c92278d4a6ec7517fc1c532d8fb462c58fbd3804"
 GIT_ENV = {
     "GIT_CONFIG_GLOBAL": os.devnull,
     "GIT_CONFIG_SYSTEM": os.devnull,
@@ -87,6 +87,13 @@ def scratch(template, tmp_path):
     repo = tmp_path / "repo"
     shutil.copytree(template, repo)
     return repo
+
+
+@pytest.fixture
+def focus_sha(scratch, load_module, tmp_path):
+    packager = load_module("contract/tools/formpkg.py", "_packager_for_the_digest")
+    built = packager.build(scratch / "extensions" / FOCUS / "package", tmp_path / "built")[0]
+    return hashlib.sha256(built.read_bytes()).hexdigest()
 
 
 @pytest.fixture
@@ -190,20 +197,20 @@ def test_version_below_the_base_commit_fails(scratch, check):
     assert f"0.0.9 is below {FOCUS_VERSION} on origin/main" in section(out.stdout, f"extensions/{FOCUS}")
 
 
-def test_published_version_with_same_bytes_passes(scratch, check):
-    index = write_index(scratch, [{"id": FOCUS, "version": FOCUS_VERSION, "sha256": FOCUS_SHA}])
+def test_published_version_with_same_bytes_passes(scratch, check, focus_sha):
+    index = write_index(scratch, [{"id": FOCUS, "version": FOCUS_VERSION, "sha256": focus_sha}])
     out = check(f"extensions/{FOCUS}", published=index)
     assert out.returncode == 0, out.stdout
     assert "ok    2 version and immutability" in out.stdout
 
 
-def test_published_version_with_other_bytes_fails(scratch, check):
+def test_published_version_with_other_bytes_fails(scratch, check, focus_sha):
     other = "0" * 64
     index = write_index(scratch, [{"id": FOCUS, "version": FOCUS_VERSION, "sha256": other}])
     out = check(f"extensions/{FOCUS}", published=index)
     assert out.returncode == 1
     block = section(out.stdout, f"extensions/{FOCUS}")
-    assert f"{FOCUS_VERSION} is published with SHA-256 {other}, but this folder builds {FOCUS_SHA}" in block
+    assert f"{FOCUS_VERSION} is published with SHA-256 {other}, but this folder builds {focus_sha}" in block
     assert "raise the version" in block
 
 
@@ -377,11 +384,12 @@ def test_changed_ids_lists_ids_files_and_tooling(scratch, load_module, monkeypat
     assert "git diff --name-only no-such-branch...HEAD failed" in str(stop.value)
 
 
-def test_check_reproducible_returns_the_documented_digest(scratch, load_module):
+def test_check_reproducible_returns_the_digest_of_the_package_it_builds(scratch, load_module, focus_sha):
     mod = load_module("tools/check.py")
     result = mod.Result("x")
     digest = mod.check_reproducible(scratch / "extensions" / FOCUS, True, result)
-    assert digest == FOCUS_SHA
+    assert re.fullmatch(r"[0-9a-f]{64}", focus_sha)
+    assert digest == focus_sha
     assert result.errors == []
     assert result.passed == ["3 reproducible"]
     assert result.notes == [f"{FOCUS}: the npm rebuild was skipped (--skip-npm)"]
