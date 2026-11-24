@@ -17,6 +17,9 @@ tools, never copied.
 - `contract/`: the kit, identical to its source. Update it only by copying the whole kit again, then
   `python3 tools/check_kit.py --print` gives the new lines for `contract.sha256`, which `tools/check_kit.py` (run by
   the `verify` workflow) checks the copy against.
+- `tests/`: the tests, kept outside `extensions/` and `contract/` so no extension's bytes and no kit file change.
+  pytest for the Python tools and the kit, Node's own test runner for the kit's and the extensions' TypeScript and
+  JavaScript. `tests/README.md` says how to run them and what a test must do; the `tests` workflow runs them.
 
 ## Laws
 

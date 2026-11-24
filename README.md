@@ -65,6 +65,7 @@ tools/check.py              the pull request checks
 tools/check_kit.py          fails when the kit copy does not match contract.sha256
 tools/build_index.py        builds, signs and indexes every package into dist/
 tools/new_signing_key.py    makes an Ed25519 key pair
+tests/                      the tests of the tools, the kit and the extensions' modules (tests/README.md)
 ```
 
 ## Tools
@@ -76,6 +77,7 @@ python3 tools/check.py --changed             # what this branch changes against 
 python3 tools/check.py extensions/shot-list  # one folder
 python3 tools/check_kit.py                   # the contract kit copy against contract.sha256
 python3 tools/build_index.py                 # dist/: packages, extensions.json, blocklist.json (unsigned without keys)
+python3 -m pytest                            # the Python tests; tests/README.md has the Node line and the setup
 ```
 
 `build_index.py` signs when `PUBLISHER_SIGNING_KEY` and `REGISTRY_SIGNING_KEY` are set (base64 raw 32-byte Ed25519
