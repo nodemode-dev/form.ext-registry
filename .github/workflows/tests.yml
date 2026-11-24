@@ -30,4 +30,5 @@ jobs:
       - name: Python tests of the tools, the contract kit and the registry's data
         run: python -m pytest
       - name: Node tests of the contract kit and the extensions' modules
+        if: ${{ !cancelled() }}
         run: node --experimental-transform-types --import ./tests/ts/register.mjs --test "tests/**/*.test.ts" "tests/**/*.test.mjs"
