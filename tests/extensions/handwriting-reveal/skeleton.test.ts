@@ -360,3 +360,117 @@ test('tracing a small square gives one dot', () => {
   assert.equal(s[0].points.length, 2);
   for (const [x, y] of s[0].points) assert.ok(x >= 0 && x <= 6 && y >= 0 && y <= 6);
 });
+
+function poly(v: number[][]) {
+  return { vertices: v, in: [], out: [], closed: true };
+}
+
+function segDist(p: number[], a: number[], b: number[]): number {
+  const dx = b[0] - a[0];
+  const dy = b[1] - a[1];
+  const l2 = dx * dx + dy * dy;
+  const t = l2 ? Math.max(0, Math.min(1, ((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / l2)) : 0;
+  return Math.hypot(p[0] - a[0] - t * dx, p[1] - a[1] - t * dy);
+}
+
+function near(p: number[], q: number[]): number {
+  return Math.hypot(p[0] - q[0], p[1] - q[1]);
+}
+
+function samples(pts: number[][]): number[][] {
+  const out: number[][] = [];
+  for (let i = 1; i < pts.length; i++)
+    for (let k = 0; k <= 10; k++) out.push([pts[i - 1][0] + ((pts[i][0] - pts[i - 1][0]) * k) / 10, pts[i - 1][1] + ((pts[i][1] - pts[i - 1][1]) * k) / 10]);
+  return out;
+}
+
+const HBAR = [rect(0, 0, 60, 8)];
+const VBAR = [rect(0, 0, 8, 60)];
+const DIAG = [poly([[0, 0], [8, 0], [48, 40], [40, 40]])];
+const LSHAPE = [rect(0, 0, 8, 48), rect(0, 40, 48, 48)];
+
+const inHBar = (p: number[]) => Math.max(0 - p[0], p[0] - 60, 0 - p[1], p[1] - 8, 0);
+const inVBar = (p: number[]) => Math.max(0 - p[0], p[0] - 8, 0 - p[1], p[1] - 60, 0);
+const inDiag = (p: number[]) => Math.max(0 - p[1], p[1] - 40, (p[1] - p[0]) / Math.SQRT2, (p[0] - p[1] - 8) / Math.SQRT2, 0);
+
+test('every point of a thick horizontal bar stroke lies within a pixel of the middle row and spans the bar', () => {
+  const s = traceGlyph(HBAR, { scale: 1 });
+  assert.equal(s.length, 1);
+  const pts = s[0].points;
+  for (const p of pts) assert.ok(Math.abs(p[1] - 4) <= 1);
+  const xs = pts.map((p: number[]) => p[0]);
+  assert.ok(Math.min(...xs) <= 4 + 2);
+  assert.ok(Math.max(...xs) >= 60 - 4 - 2);
+});
+
+test('every point of a thick vertical bar stroke lies within a pixel of the middle column and spans the bar', () => {
+  const s = traceGlyph(VBAR, { scale: 1 });
+  assert.equal(s.length, 1);
+  const pts = s[0].points;
+  for (const p of pts) assert.ok(Math.abs(p[0] - 4) <= 1);
+  const ys = pts.map((p: number[]) => p[1]);
+  assert.ok(Math.min(...ys) <= 4 + 2);
+  assert.ok(Math.max(...ys) >= 60 - 4 - 2);
+});
+
+test('a diagonal bar gives one stroke along the diagonal with ends near the bar ends', () => {
+  const s = traceGlyph(DIAG, { scale: 1 });
+  assert.equal(s.length, 1);
+  assert.equal(s[0].dot, false);
+  const pts = s[0].points;
+  for (const p of pts.slice(1, -1)) assert.ok(segDist(p, [4, 0], [44, 40]) <= 1);
+  for (const p of [pts[0], pts[pts.length - 1]]) assert.ok(segDist(p, [4, 0], [44, 40]) <= 4 / Math.SQRT2);
+  const a = pts[0];
+  const b = pts[pts.length - 1];
+  const [top, bottom] = a[1] < b[1] ? [a, b] : [b, a];
+  assert.ok(near(top, [4, 0]) <= 6);
+  assert.ok(near(bottom, [44, 40]) <= 6);
+});
+
+test('an L gives strokes that reach its three extremities and meet near the corner', () => {
+  const s = traceGlyph(LSHAPE, { scale: 1 });
+  assert.ok(s.length >= 1 && s.length <= 2);
+  const all = s.flatMap((st: any) => st.points);
+  const closest = (q: number[]) => Math.min(...all.map((p: number[]) => near(p, q)));
+  assert.ok(closest([4, 0]) <= 6);
+  assert.ok(closest([48, 44]) <= 6);
+  assert.ok(closest([4, 44]) <= 2);
+  for (const st of s) {
+    const e = [st.points[0], st.points[st.points.length - 1]];
+    if (s.length === 2) assert.ok(Math.min(...e.map((p: number[]) => near(p, [4, 44]))) <= 3);
+  }
+});
+
+for (const t of [4, 10]) {
+  test(`a bar ${t} pixels thick reports a stroke width matching its thickness`, () => {
+    const s = traceGlyph([rect(0, 0, 80, t)], { scale: 1 });
+    assert.equal(s.length, 1);
+    assert.ok(Math.abs(2 * s[0].halfWidth - t) <= 1);
+    assert.ok(Math.abs(2 * s[0].medianHalf - t) <= 1);
+    assert.ok(s[0].medianHalf <= s[0].halfWidth);
+  });
+}
+
+const SHAPES: [string, any[], (p: number[]) => number][] = [
+  ['horizontal bar', HBAR, inHBar],
+  ['vertical bar', VBAR, inVBar],
+  ['diagonal bar', DIAG, inDiag],
+  ['L', LSHAPE, (p) => Math.min(Math.max(0 - p[0], p[0] - 8, 0 - p[1], p[1] - 48, 0), Math.max(0 - p[0], p[0] - 48, 40 - p[1], p[1] - 48, 0))],
+];
+
+for (const [name, paths, outside] of SHAPES) {
+  test(`the strokes of a ${name} never leave the filled shape by more than a pixel`, () => {
+    for (const st of traceGlyph(paths, { scale: 1 })) for (const p of samples(st.points)) assert.ok(outside(p) <= 1);
+  });
+}
+
+test('segments between consecutive points stay within the simplification tolerance of the middle line', () => {
+  const lines: [string, any[], number[][][]][] = [
+    ['horizontal bar', HBAR, [[[0, 4], [60, 4]]]],
+    ['diagonal bar', DIAG, [[[4, 0], [44, 40]]]],
+    ['L', LSHAPE, [[[4, 0], [4, 44]], [[4, 44], [48, 44]]]],
+  ];
+  for (const [, paths, mids] of lines)
+    for (const st of traceGlyph(paths, { scale: 1 }))
+      for (const p of samples(st.points)) assert.ok(Math.min(...mids.map(([a, b]) => segDist(p, a, b))) <= 0.7 + 1);
+});

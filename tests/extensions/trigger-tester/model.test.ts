@@ -383,3 +383,48 @@ test('first sentence stops at the first full stop and tidies white space', () =>
   assert.equal(firstSentence(''), '');
   assert.equal(firstSentence('x'.repeat(500)).length, 200);
 });
+
+test('with a shared query word held equally often the shorter description ranks higher', () => {
+  const short = skill('app/a', 'a', 'zebra');
+  const long = skill('app/b', 'b', 'zebra lion tiger');
+  const index = new Index([long, short]);
+  const out = index.rank('zebra');
+  assert.deepEqual(out.map((r) => r.key), ['app/a', 'app/b']);
+  assert.ok(scoreOf(out, 'app/a') > scoreOf(out, 'app/b'));
+});
+
+test('the BM25 score of a two-document index matches the hand calculation', () => {
+  const short = skill('app/a', 'a', 'zebra');
+  const long = skill('app/b', 'b', 'zebra lion tiger');
+  const out = new Index([short, long]).rank('zebra');
+  assert.ok(Math.abs(scoreOf(out, 'app/a') - 0.251) < 0.0005, String(scoreOf(out, 'app/a')));
+  assert.ok(Math.abs(scoreOf(out, 'app/b') - 0.143) < 0.0005, String(scoreOf(out, 'app/b')));
+  assert.equal(scoreOf(out, 'app/a').toFixed(3), '0.251');
+  assert.equal(scoreOf(out, 'app/b').toFixed(3), '0.143');
+});
+
+test('a term found in only one of two documents scores by hand', () => {
+  const short = skill('app/a', 'a', 'zebra');
+  const long = skill('app/b', 'b', 'zebra lion tiger');
+  const out = new Index([short, long]).rank('tiger');
+  assert.equal(scoreOf(out, 'app/a'), 0);
+  assert.equal(scoreOf(out, 'app/b').toFixed(3), '0.545');
+});
+
+function body(n: number): string {
+  return 'a'.repeat(n);
+}
+
+test('firstSentence takes a first sentence of 20 and 220 characters before the stop', () => {
+  assert.equal(firstSentence(`${body(20)}. Next sentence follows here.`), `${body(20)}.`);
+  assert.equal(firstSentence(`${body(220)}. Next sentence follows here.`), `${body(220)}.`);
+  assert.equal(firstSentence(`${body(20)}!`), `${body(20)}!`);
+  assert.equal(firstSentence(`${body(20)}? More`), `${body(20)}?`);
+});
+
+test('firstSentence falls back to the first 200 characters outside the 20 to 220 range', () => {
+  const short = `${body(19)}. Next sentence follows here.`;
+  assert.equal(firstSentence(short), short);
+  const long = `${body(221)}. Next sentence follows here.`;
+  assert.equal(firstSentence(long), body(200));
+});

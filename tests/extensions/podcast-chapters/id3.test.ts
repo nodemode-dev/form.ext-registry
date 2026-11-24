@@ -418,3 +418,85 @@ test("more than 255 chapters are refused and exactly 255 are written", T, () => 
   assert.equal(w.frames.find((f) => f.id === "CTOC")?.body[5], 255);
   assert.equal(parseTag(out).chapters.length, 255);
 });
+
+const chapSub = (c: TagChapter): number[] => Array.from(chapterFrame(c, 3)).slice(10 + c.id.length + 1 + 16);
+
+test("a chapter title outside Latin-1 is written with encoding byte 1 and a UTF-16 little-endian byte order mark", T, () => {
+  const sub = chapSub(ch("c", 0, 1, "日本"));
+  assert.deepEqual(sub.slice(0, 4), ascii("TIT2"));
+  assert.deepEqual(sub.slice(4, 8), be32(1 + 2 + 4));
+  assert.deepEqual(sub.slice(10), [1, 0xff, 0xfe, 0xe5, 0x65, 0x2c, 0x67]);
+});
+
+test("a chapter title inside Latin-1 is written with encoding byte 0 and no byte order mark", T, () => {
+  const sub = chapSub(ch("c", 0, 1, "Café ÿ"));
+  assert.deepEqual(sub.slice(4, 8), be32(1 + 6));
+  assert.deepEqual(sub.slice(10), [0, 0x43, 0x61, 0x66, 0xe9, 0x20, 0xff]);
+});
+
+test("the Latin-1 limit is U+00FF: U+0100 switches the title to UTF-16", T, () => {
+  assert.equal(chapSub(ch("c", 0, 1, "ÿ"))[10], 0);
+  assert.deepEqual(chapSub(ch("c", 0, 1, "Ā")).slice(10), [1, 0xff, 0xfe, 0x00, 0x01]);
+});
+
+test("one character outside Latin-1 puts the whole title in UTF-16, Latin-1 letters included", T, () => {
+  assert.deepEqual(chapSub(ch("c", 0, 1, "aé日")).slice(10), [1, 0xff, 0xfe, 0x61, 0x00, 0xe9, 0x00, 0xe5, 0x65]);
+});
+
+test("the table of contents title follows the same encoding rule", T, () => {
+  const wideToc = Array.from(tocFrame(["a"], "日本", 3));
+  const tocSub = (b: number[]): number[] => b.slice(10 + 4 + 1 + 1 + 2);
+  const wide = tocSub(wideToc);
+  assert.deepEqual(wide.slice(0, 4), ascii("TIT2"));
+  assert.deepEqual(wide.slice(10), [1, 0xff, 0xfe, 0xe5, 0x65, 0x2c, 0x67]);
+  assert.deepEqual(tocSub(Array.from(tocFrame(["a"], "Café", 3))).slice(10), [0, 0x43, 0x61, 0x66, 0xe9]);
+});
+
+test("a written non-Latin-1 title is the encoding byte, a mark and the text for the whole file, and reads back", T, () => {
+  const out = writeTag(file(AUDIO), [ch("a", 0, 1, "Ж"), ch("b", 1, 2, "Zoë")]).bytes;
+  const w = walk(out);
+  const bodies = w.frames.filter((f) => f.id === "CHAP").map((f) => f.body.slice(2 + 16 + 10));
+  assert.deepEqual(bodies, [[1, 0xff, 0xfe, 0x16, 0x04], [0, 0x5a, 0x6f, 0xeb]]);
+  assert.deepEqual(parseTag(out).chapters.map((c) => c.title), ["Ж", "Zoë"]);
+});
+
+test("a v2.4 UTF-8 TXXX frame that does not fit Latin-1 is written as encoding 1 with a mark on description and value", T, () => {
+  const txxx = frame4("TXXX", cat([3], [0xe6, 0x97, 0xa5], [0], [0xe6, 0x9c, 0xac]));
+  const w = walk(writeTag(file(tag(4, 0, txxx), AUDIO), [ch("c", 0, 1, "T")]).bytes);
+  assert.deepEqual(w.frames.find((f) => f.id === "TXXX")?.body, [1, 0xff, 0xfe, 0xe5, 0x65, 0, 0, 0xff, 0xfe, 0x2c, 0x67]);
+});
+
+test("a v2.4 UTF-8 TXXX frame is written as encoding 0 when both parts fit Latin-1, and wide when only one part does not", T, () => {
+  const fits = frame4("TXXX", cat([3], ascii("d"), [0xc3, 0xa9], [0], ascii("v"), [0xc3, 0xbc]));
+  const mixed = frame4("TXXX", cat([3], ascii("ab"), [0], [0xe6, 0x97, 0xa5]));
+  const get = (f: number[]) => walk(writeTag(file(tag(4, 0, f), AUDIO), [ch("c", 0, 1, "T")]).bytes).frames.find((x) => x.id === "TXXX")?.body;
+  assert.deepEqual(get(fits), [0, 0x64, 0xe9, 0, 0x76, 0xfc]);
+  assert.deepEqual(get(mixed), [1, 0xff, 0xfe, 0x61, 0x00, 0x62, 0x00, 0, 0, 0xff, 0xfe, 0xe5, 0x65]);
+});
+
+test("UTF-16 text with a big-endian mark and with a little-endian mark decode to the same string", T, () => {
+  const text = "日本語 ЖA é";
+  const le = [0xff, 0xfe, ...[...text].flatMap((c) => [c.charCodeAt(0) & 255, c.charCodeAt(0) >> 8])];
+  const be = [0xfe, 0xff, ...[...text].flatMap((c) => [c.charCodeAt(0) >> 8, c.charCodeAt(0) & 255])];
+  const body = cat(
+    frame3("CHAP", chapBody("l", 0, 1, frame3("TIT2", cat([1], le)))),
+    frame3("CHAP", chapBody("b", 1, 2, frame3("TIT2", cat([1], be)))),
+    frame3("CHAP", chapBody("t", 2, 3, frame3("TIT2", cat([1], be, [0, 0])))),
+  );
+  const titles = parseTag(file(tag(3, 0, body))).chapters.map((c) => c.title);
+  assert.deepEqual(titles, [text, text, text]);
+});
+
+test("UTF-16BE text with encoding 2 and no mark decodes in v2.3 and v2.4 tags, with or without a terminator", T, () => {
+  const sub = (f: typeof frame3, enc: number[]) => f("CHAP", chapBody("x", 0, 1, f("TIT2", cat([2], enc))));
+  const text = [0x65, 0xe5, 0x67, 0x2c, 0x00, 0x41];
+  assert.equal(parseTag(file(tag(3, 0, sub(frame3, text)))).chapters[0].title, "日本A");
+  assert.equal(parseTag(file(tag(4, 0, sub(frame4, text)))).chapters[0].title, "日本A");
+  assert.equal(parseTag(file(tag(4, 0, sub(frame4, [...text, 0, 0])))).chapters[0].title, "日本A");
+});
+
+test("a v2.4 TXXX frame in encoding 2 is read as UTF-16BE and rewritten in a v2.3 encoding", T, () => {
+  const txxx = frame4("TXXX", cat([2], [0x00, 0x64, 0, 0], [0x65, 0xe5]));
+  const w = walk(writeTag(file(tag(4, 0, txxx), AUDIO), [ch("c", 0, 1, "T")]).bytes);
+  assert.deepEqual(w.frames.find((f) => f.id === "TXXX")?.body, [1, 0xff, 0xfe, 0x64, 0x00, 0, 0, 0xff, 0xfe, 0xe5, 0x65]);
+});

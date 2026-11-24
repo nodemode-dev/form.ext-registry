@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { STYLES, prepare } from '../../../extensions/citations/src/styles.ts';
 import { cleanDoi, pageRange } from '../../../extensions/citations/src/model.ts';
 import type { Item, Name } from '../../../extensions/citations/src/model.ts';
-import { scan, firstUse, build, groupText, citationText } from '../../../extensions/citations/src/page.ts';
+import { scan, firstUse, build, groupText, citationText, findSection } from '../../../extensions/citations/src/page.ts';
 import type { Block } from '../../../extensions/citations/src/page.ts';
 
 const okafor: Name = { family: 'Okafor', given: 'Ngozi' };
@@ -408,4 +408,217 @@ test('page ranges are normalised to an en dash and doi prefixes are removed', ()
   assert.equal(cleanDoi('https://doi.org/10.1000/jcr.2019.12'), '10.1000/jcr.2019.12');
   assert.equal(cleanDoi('doi: 10.1000/jcr.2019.12'), '10.1000/jcr.2019.12');
   assert.equal(cleanDoi('   '), undefined);
+});
+
+const dated = (type: Item['type'], issued: Item['issued'], extra: Partial<Item> = {}): Item => ({
+  id: 'okafor2019tides',
+  type,
+  title: 'Tides of the estuary',
+  author: [okafor],
+  issued,
+  container: 'Coastal Weekly',
+  ...extra,
+});
+
+const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+test('apa magazine and newspaper articles show the month name and day', () => {
+  assert.equal(
+    STYLES.apa.entry(dated('article-magazine', { year: 2019, month: 1, day: 5 }), one),
+    'Okafor, N. (2019, January 5). Tides of the estuary. *Coastal Weekly*.',
+  );
+  assert.equal(
+    STYLES.apa.entry(dated('article-newspaper', { year: 2019, month: 12, day: 31 }), one),
+    'Okafor, N. (2019, December 31). Tides of the estuary. *Coastal Weekly*.',
+  );
+});
+
+test('apa shows only the month name when the date has no day', () => {
+  assert.equal(
+    STYLES.apa.entry(dated('article-magazine', { year: 2019, month: 12 }), one),
+    'Okafor, N. (2019, December). Tides of the estuary. *Coastal Weekly*.',
+  );
+  assert.equal(
+    STYLES.apa.entry(dated('article-newspaper', { year: 2019, month: 1 }), one),
+    'Okafor, N. (2019, January). Tides of the estuary. *Coastal Weekly*.',
+  );
+});
+
+test('apa shows only the year when the date has no month', () => {
+  assert.equal(
+    STYLES.apa.entry(dated('article-magazine', { year: 2019 }), one),
+    'Okafor, N. (2019). Tides of the estuary. *Coastal Weekly*.',
+  );
+});
+
+test('apa web page shows the month name and day of its date', () => {
+  assert.equal(
+    STYLES.apa.entry(dated('webpage', { year: 2019, month: 1, day: 5 }), one),
+    'Okafor, N. (2019, January 5). *Tides of the estuary*. Coastal Weekly.',
+  );
+  assert.equal(
+    STYLES.apa.entry(dated('webpage', { year: 2019, month: 12, day: 31 }), one),
+    'Okafor, N. (2019, December 31). *Tides of the estuary*. Coastal Weekly.',
+  );
+  assert.equal(
+    STYLES.apa.entry(dated('webpage', { year: 2019, month: 12 }), one),
+    'Okafor, N. (2019, December). *Tides of the estuary*. Coastal Weekly.',
+  );
+});
+
+test('apa names each of the twelve months in a dated magazine entry', () => {
+  MONTH_NAMES.forEach((name, i) => {
+    assert.equal(
+      STYLES.apa.entry(dated('article-magazine', { year: 2019, month: i + 1, day: 15 }), one),
+      `Okafor, N. (2019, ${name} 15). Tides of the estuary. *Coastal Weekly*.`,
+    );
+  });
+});
+
+test('apa does not print the month for a journal article', () => {
+  assert.ok(STYLES.apa.entry(article([okafor], { issued: { year: 2019, month: 3, day: 7 } }), one).startsWith('Okafor, N. (2019). '));
+});
+
+test('chicago magazine and newspaper articles put the month name and day after the title of the periodical', () => {
+  assert.equal(
+    STYLES.chicago.entry(dated('article-magazine', { year: 2019, month: 1, day: 5 }), one),
+    'Okafor, Ngozi. 2019. “Tides of the estuary.” *Coastal Weekly*, January 5.',
+  );
+  assert.equal(
+    STYLES.chicago.entry(dated('article-newspaper', { year: 2019, month: 12, day: 31 }), one),
+    'Okafor, Ngozi. 2019. “Tides of the estuary.” *Coastal Weekly*, December 31.',
+  );
+  assert.equal(
+    STYLES.chicago.entry(dated('article-magazine', { year: 2019, month: 12 }), one),
+    'Okafor, Ngozi. 2019. “Tides of the estuary.” *Coastal Weekly*, December.',
+  );
+});
+
+test('chicago names each of the twelve months in a dated newspaper entry', () => {
+  MONTH_NAMES.forEach((name, i) => {
+    assert.equal(
+      STYLES.chicago.entry(dated('article-newspaper', { year: 2019, month: i + 1, day: 9 }), one),
+      `Okafor, Ngozi. 2019. “Tides of the estuary.” *Coastal Weekly*, ${name} 9.`,
+    );
+  });
+});
+
+test('chicago leaves the month out of a journal article', () => {
+  assert.equal(
+    STYLES.chicago.entry(dated('article-journal', { year: 2019, month: 3, day: 7 }), one),
+    'Okafor, Ngozi. 2019. “Tides of the estuary.” *Coastal Weekly*.',
+  );
+});
+
+test('chicago web page prints the access date with the month name and day', () => {
+  assert.equal(
+    STYLES.chicago.entry(dated('webpage', { year: 2019 }, { accessed: { year: 2021, month: 1, day: 5 } }), one),
+    'Okafor, Ngozi. 2019. “Tides of the estuary.” Coastal Weekly. Accessed January 5, 2021.',
+  );
+  assert.equal(
+    STYLES.chicago.entry(dated('webpage', { year: 2019 }, { accessed: { year: 2021, month: 12, day: 31 } }), one),
+    'Okafor, Ngozi. 2019. “Tides of the estuary.” Coastal Weekly. Accessed December 31, 2021.',
+  );
+});
+
+test('chicago web page access date without a day shows the month name and year', () => {
+  assert.equal(
+    STYLES.chicago.entry(dated('webpage', { year: 2019 }, { accessed: { year: 2021, month: 12 } }), one),
+    'Okafor, Ngozi. 2019. “Tides of the estuary.” Coastal Weekly. Accessed December, 2021.',
+  );
+});
+
+test('chicago web page access date with only a year shows just the year', () => {
+  assert.equal(
+    STYLES.chicago.entry(dated('webpage', { year: 2019 }, { accessed: { year: 2021 } }), one),
+    'Okafor, Ngozi. 2019. “Tides of the estuary.” Coastal Weekly. Accessed 2021.',
+  );
+});
+
+test('ieee magazine and newspaper articles show the short month and day', () => {
+  assert.equal(
+    STYLES.ieee.entry(dated('article-magazine', { year: 2019, month: 1, day: 5 }), one),
+    '\\[1\\] N. Okafor, “Tides of the estuary,” *Coastal Weekly*, Jan. 5, 2019.',
+  );
+  assert.equal(
+    STYLES.ieee.entry(dated('article-newspaper', { year: 2019, month: 12, day: 31 }), one),
+    '\\[1\\] N. Okafor, “Tides of the estuary,” *Coastal Weekly*, Dec. 31, 2019.',
+  );
+  assert.equal(
+    STYLES.ieee.entry(dated('article-magazine', { year: 2019, month: 12 }), one),
+    '\\[1\\] N. Okafor, “Tides of the estuary,” *Coastal Weekly*, Dec. 2019.',
+  );
+});
+
+test('ieee web page prints the access date with the short month and day', () => {
+  assert.equal(
+    STYLES.ieee.entry(dated('webpage', { year: 2019 }, { accessed: { year: 2021, month: 1, day: 5 } }), one),
+    '\\[1\\] N. Okafor, “Tides of the estuary.” Coastal Weekly. Accessed: Jan. 5, 2021.',
+  );
+  assert.equal(
+    STYLES.ieee.entry(dated('webpage', { year: 2019 }, { accessed: { year: 2021, month: 12 } }), one),
+    '\\[1\\] N. Okafor, “Tides of the estuary.” Coastal Weekly. Accessed: Dec. 2021.',
+  );
+});
+
+function heading(id: string, level: number | undefined, text: string): Block {
+  return { id, type: 'heading', level, text };
+}
+
+test('findSection finds the bibliography by its heading text ignoring case and spaces', () => {
+  const blocks = [heading('h1', 1, 'Intro'), para('p1', 'x'), heading('h2', 2, 'References'), para('p2', 'a'), para('p3', 'b')];
+  assert.deepEqual(findSection(blocks, [], 'References'), ['h2', 'p2', 'p3']);
+  assert.deepEqual(findSection(blocks, [], '  references '), ['h2', 'p2', 'p3']);
+});
+
+test('findSection ignores paragraphs with the heading text and non matching headings', () => {
+  const blocks = [para('p1', 'References'), heading('h1', 2, 'Reference list'), para('p2', 'a')];
+  assert.deepEqual(findSection(blocks, [], 'References'), []);
+});
+
+test('findSection ends the section at the next heading of the same level', () => {
+  const blocks = [heading('h1', 2, 'References'), para('p1', 'a'), heading('h2', 2, 'Appendix'), para('p2', 'b')];
+  assert.deepEqual(findSection(blocks, [], 'References'), ['h1', 'p1']);
+});
+
+test('findSection ends the section at the next heading of a higher level', () => {
+  const blocks = [heading('h1', 2, 'References'), para('p1', 'a'), heading('h2', 1, 'Part Two'), para('p2', 'b')];
+  assert.deepEqual(findSection(blocks, [], 'References'), ['h1', 'p1']);
+});
+
+test('findSection treats a heading without a level as level one', () => {
+  const blocks = [heading('h1', undefined, 'References'), para('p1', 'a'), heading('h2', 1, 'Next'), para('p2', 'b')];
+  assert.deepEqual(findSection(blocks, [], 'References'), ['h1', 'p1']);
+  const lower = [heading('h1', 2, 'References'), para('p1', 'a'), heading('h2', undefined, 'Next')];
+  assert.deepEqual(findSection(lower, [], 'References'), ['h1', 'p1']);
+});
+
+test('findSection keeps a lower level heading and its text inside the section', { todo: 'defect: findSection stops at a lower level heading inside the bibliography because only paragraph and list blocks are accepted' }, () => {
+  const blocks = [heading('h1', 2, 'References'), para('p1', 'a'), heading('h2', 3, 'Primary'), para('p2', 'b'), heading('h3', 2, 'Appendix'), para('p3', 'c')];
+  assert.deepEqual(findSection(blocks, [], 'References'), ['h1', 'p1', 'h2', 'p2']);
+});
+
+test('findSection runs to the end of the page when no heading follows', () => {
+  const blocks = [heading('h1', 1, 'Intro'), para('p1', 'x'), heading('h2', 2, 'References'), para('p2', 'a'), para('p3', 'b'), para('p4', 'c')];
+  assert.deepEqual(findSection(blocks, [], 'References'), ['h2', 'p2', 'p3', 'p4']);
+});
+
+test('findSection returns just the heading when it is the last block', () => {
+  assert.deepEqual(findSection([para('p1', 'x'), heading('h1', 2, 'References')], [], 'References'), ['h1']);
+});
+
+test('findSection takes the last matching heading on the page', () => {
+  const blocks = [heading('h1', 2, 'References'), para('p1', 'a'), heading('h2', 1, 'Notes'), heading('h3', 2, 'References'), para('p2', 'b')];
+  assert.deepEqual(findSection(blocks, [], 'References'), ['h3', 'p2']);
+});
+
+test('findSection reports none when the page has no such heading', () => {
+  const blocks = [heading('h1', 1, 'Intro'), para('p1', 'x'), heading('h2', 2, 'Bibliography')];
+  assert.deepEqual(findSection(blocks, [], 'References'), []);
+  assert.deepEqual(findSection([], [], 'References'), []);
+});
+
+test('findSection prefers stored ids that are still on the page', () => {
+  const blocks = [heading('h1', 2, 'References'), para('p1', 'a'), para('p2', 'b')];
+  assert.deepEqual(findSection(blocks, ['p1', 'gone', 'p2'], 'Other'), ['p1', 'p2']);
 });

@@ -441,3 +441,42 @@ test("types reads plain, listed, anyOf, ref, enum and implied object types", () 
   assert.deepEqual([...types({ properties: { a: {} } })], ["object"]);
   assert.deepEqual([...types({})], []);
 });
+
+test("a snapshot without schemas compared with one that has them does not report arguments as changed", () => {
+  const bare = snap([tool("search", null), tool("cut", null)], "Bare");
+  const full = snap([search(), cut()], "Full");
+  for (const [a, b] of [[bare, full], [full, bare]]) {
+    const d = diff(a, b);
+    assert.equal(d.argsCompared, false);
+    assert.deepEqual(d.counts, { added: 0, removed: 0, renamed: 0, changed: 0, same: 2, breaking: 0 });
+    assert.ok(d.tools.every((t) => t.status === "same" && t.level === null && t.changes.length === 0));
+    assert.equal(d.notes.length, 1);
+    assert.match(d.notes[0], /^Arguments not compared: Bare has no argument schemas\./);
+  }
+});
+
+test("both snapshots without schemas name both labels in the note", () => {
+  const d = diff(snap([tool("a", null)], "One"), snap([tool("a", null)], "Two"));
+  assert.equal(d.argsCompared, false);
+  assert.equal(d.notes.length, 1);
+  assert.match(d.notes[0], /One and Two have no argument schemas/);
+});
+
+test("two snapshots with schemas compare arguments", () => {
+  const narrowed = search();
+  delete narrowed.schema.properties.limit;
+  const d = diff(snap([search()], "A"), snap([narrowed], "B"));
+  assert.equal(d.argsCompared, true);
+  assert.deepEqual(d.notes, []);
+  assert.equal(d.counts.changed, 1);
+  const t = d.tools[0];
+  assert.equal(t.status, "changed");
+  assert.equal(at(t, "limit").length, 1);
+  assert.equal(at(t, "limit")[0].level, "breaking");
+});
+
+test("a renamed tool with identical schemas is paired when both snapshots have schemas", () => {
+  const d = diff(snap([cut()]), snap([{ ...cut(), name: "split" }]));
+  assert.equal(d.argsCompared, true);
+  assert.deepEqual(d.tools.map((t) => [t.name, t.status]), [["split", "renamed"]]);
+});

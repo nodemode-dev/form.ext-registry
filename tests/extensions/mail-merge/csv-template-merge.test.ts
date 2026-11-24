@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { inflateRawSync } from 'node:zlib';
 import { decodeText, parseCsv, parseRanges, type Table } from '../../../extensions/mail-merge/src/csv.ts';
-import { fromHost, signature, type HostField } from '../../../extensions/mail-merge/src/template.ts';
+import { fromFile, fromHost, signature, type HostField } from '../../../extensions/mail-merge/src/template.ts';
 import { autoMap, CLEAR, fileName, KEEP, rowCells, runJob, unknownTokens } from '../../../extensions/mail-merge/src/merge.ts';
 import { PdfDoc } from '../../../extensions/mail-merge/src/pdf/doc.ts';
 import { readForm } from '../../../extensions/mail-merge/src/pdf/form.ts';
@@ -309,4 +309,185 @@ test('zero rows give an empty archive and no problems', async () => {
   const out = await job([], { name: 'Name' }, '{Name}');
   assert.equal(out.problems, 0);
   assert.deepEqual(unzip(out.bytes), []);
+});
+
+test('a file with more steady lines for one delimiter uses it even when another has more in the header', () => {
+  const t = parseCsv('a,b,c;d\n1;2\n3;4\n5;6\n');
+  assert.equal(t.delimiter, ';');
+  assert.deepEqual(t.columns, ['a,b,c', 'd']);
+  assert.deepEqual(t.rows, [['1', '2'], ['3', '4'], ['5', '6']]);
+});
+
+test('when two delimiters are equally steady the one that splits into more columns is used', () => {
+  const t = parseCsv('a;b;c,d\n1;2;3,4\n5;6;7,8\n');
+  assert.equal(t.delimiter, ';');
+  assert.deepEqual(t.columns, ['a', 'b', 'c,d']);
+  assert.deepEqual(t.rows, [['1', '2', '3,4'], ['5', '6', '7,8']]);
+});
+
+test('a tab file is recognised and commas and semicolons in it are data', () => {
+  const t = parseCsv('name\tnote\nAnn\tred, green\nBob\tblue; dark\n');
+  assert.equal(t.delimiter, '\t');
+  assert.deepEqual(t.columns, ['name', 'note']);
+  assert.deepEqual(t.rows, [['Ann', 'red, green'], ['Bob', 'blue; dark']]);
+});
+
+test('a tab that appears on every line beats a comma that appears only in the header', () => {
+  const t = parseCsv('a,b\tc\n1\t2\n3\t4\n');
+  assert.equal(t.delimiter, '\t');
+  assert.deepEqual(t.columns, ['a,b', 'c']);
+  assert.deepEqual(t.rows, [['1', '2'], ['3', '4']]);
+});
+
+test('a comma file keeps semicolons and tabs inside values', () => {
+  const t = parseCsv('a,b\n1;2,3\n');
+  assert.equal(t.delimiter, ',');
+  assert.deepEqual(t.rows, [['1;2', '3']]);
+});
+
+test('a delimiter inside quotes does not decide which delimiter the file uses', () => {
+  const comma = parseCsv('"a;b",c\n"1;2",3\n');
+  assert.equal(comma.delimiter, ',');
+  assert.deepEqual(comma.columns, ['a;b', 'c']);
+  assert.deepEqual(comma.rows, [['1;2', '3']]);
+  const semi = parseCsv('"a,b";c\n"1,2";3\n');
+  assert.equal(semi.delimiter, ';');
+  assert.deepEqual(semi.columns, ['a,b', 'c']);
+  assert.deepEqual(semi.rows, [['1,2', '3']]);
+});
+
+test('a single column file reads as one column and one value per line', () => {
+  const t = parseCsv('name\nAnn\nBob\n');
+  assert.equal(t.delimiter, ',');
+  assert.deepEqual(t.columns, ['name']);
+  assert.deepEqual(t.rows, [['Ann'], ['Bob']]);
+});
+
+test('a single column file whose only commas are quoted stays one column', () => {
+  const t = parseCsv('"last, first"\n"Lovelace, Ada"\n"Hopper, Grace"\n');
+  assert.deepEqual(t.columns, ['last, first']);
+  assert.deepEqual(t.rows, [['Lovelace, Ada'], ['Hopper, Grace']]);
+});
+
+const textFields = (...names: string[]) =>
+  fromHost({ open: true }, names.map((name) => ({ name, type: 'text', page: 1, x: 0, y: 0, w: 1, h: 1 }))).fields;
+
+test('a column with exactly the field name is matched', () => {
+  assert.deepEqual(autoMap(textFields('email', 'city'), ['city', 'email']), { email: 'email', city: 'city' });
+});
+
+test('names that differ in case, spaces, underscores, dashes and camelCase still match', () => {
+  const fields = textFields('first_name', 'LastName', 'date of birth', 'zipCode');
+  const m = autoMap(fields, ['First Name', 'last_name', 'Date_Of_Birth', 'ZIPCODE']);
+  assert.deepEqual(m, { first_name: 'First Name', LastName: 'last_name', 'date of birth': 'Date_Of_Birth', zipCode: 'ZIPCODE' });
+  assert.deepEqual(autoMap(textFields('postal_code'), ['POSTAL-CODE']), { postal_code: 'POSTAL-CODE' });
+});
+
+test('a name contained in the other, three letters or more, is matched in both directions', () => {
+  const m = autoMap(textFields('phone_number', 'zip'), ['Phone', 'ZIP Code']);
+  assert.deepEqual(m, { phone_number: 'Phone', zip: 'ZIP Code' });
+});
+
+test('words in another order still match', () => {
+  assert.deepEqual(autoMap(textFields('name_first'), ['First Name']), { name_first: 'First Name' });
+  assert.deepEqual(autoMap(textFields('homeAddress'), ['Address Home']), { homeAddress: 'Address Home' });
+});
+
+test('a camelCase column matches the same words in another order', { todo: 'defect: words() lower-cases the column before splitting camelCase, so column "homeAddress" is one word and never matches field "address_home"' }, () => {
+  assert.deepEqual(autoMap(textFields('address_home'), ['homeAddress']), { address_home: 'homeAddress' });
+});
+
+test('names shorter than three letters are not matched by containment', () => {
+  assert.deepEqual(autoMap(textFields('id', 'to'), ['Width', 'Total']), { id: KEEP, to: KEEP });
+  assert.deepEqual(autoMap(textFields('width'), ['ID']), { width: KEEP });
+});
+
+test('unrelated names are not matched', () => {
+  assert.deepEqual(autoMap(textFields('city', 'notes'), ['Country', 'Phone']), { city: KEEP, notes: KEEP });
+});
+
+test('the closer column wins a field whichever column comes first', () => {
+  assert.deepEqual(autoMap(textFields('email'), ['Email Address', 'Email']), { email: 'Email' });
+  assert.deepEqual(autoMap(textFields('email'), ['Email', 'Email Address']), { email: 'Email' });
+});
+
+test('the longer shared name wins a field whichever column comes first', () => {
+  assert.deepEqual(autoMap(textFields('phone_number'), ['Phone', 'Phone Num']), { phone_number: 'Phone Num' });
+  assert.deepEqual(autoMap(textFields('phone_number'), ['Phone Num', 'Phone']), { phone_number: 'Phone Num' });
+});
+
+test('the closer field wins a column whichever field comes first', () => {
+  assert.deepEqual(autoMap(textFields('full_name', 'name'), ['Name']), { full_name: KEEP, name: 'Name' });
+  assert.deepEqual(autoMap(textFields('name', 'full_name'), ['Name']), { full_name: KEEP, name: 'Name' });
+});
+
+test('a column that equals the whole dotted field name beats a field that only shares its last part', () => {
+  const m = autoMap(textFields('address', 'billing.address'), ['Billing Address']);
+  assert.deepEqual(m, { address: KEEP, 'billing.address': 'Billing Address' });
+});
+
+test('missing page sizes fall back to US Letter, portrait and unturned', () => {
+  const item = { name: 'a', type: 'text', page: 1, x: 0, y: 0, w: 1, h: 1 };
+  assert.deepEqual(fromHost({ open: true }, [item]).pages, [{ w: 612, h: 792 }]);
+  assert.deepEqual(fromHost({ open: true, pages: 2 }, []).pages, [{ w: 612, h: 792 }, { w: 612, h: 792 }]);
+  assert.deepEqual(fromHost({ open: true, pages: 1, info: {} }, []).pages, [{ w: 612, h: 792 }]);
+});
+
+test('a page without its own size takes the last known size and rotation is applied', () => {
+  const item = { name: 'a', type: 'text', page: 3, x: 0, y: 0, w: 1, h: 1 };
+  const t = fromHost({ open: true, pages: 1, info: { sizes: [{ w: 300, h: 400 }, { w: 500, h: 600, rotate: 270 }] } }, [item]);
+  assert.deepEqual(t.pages, [{ w: 300, h: 400 }, { w: 600, h: 500 }, { w: 600, h: 500 }]);
+  const flat = fromHost({ open: true, info: { sizes: [{ w: 300, h: 400, rotate: 180 }] } }, [item]);
+  assert.deepEqual(flat.pages[0], { w: 300, h: 400 });
+});
+
+test('a host field without a length limit has none and long text fits', () => {
+  const t = fromHost({ open: true }, [
+    { name: 'free', type: 'text', page: 1, x: 0, y: 0, w: 1, h: 1 },
+    { name: 'short', type: 'text', page: 1, x: 0, y: 0, w: 1, h: 1, maxLen: 5 },
+  ]);
+  assert.equal(t.fields[0].maxLen, 0);
+  assert.equal(t.fields[1].maxLen, 5);
+  const data = table(['A', 'B'], [['abcdefghijklmnopqrstuvwxyz', 'abcdefghij']]);
+  const cells = rowCells(t, data, { free: 'A', short: 'B' }, 0);
+  assert.equal(cells[0].check?.problem, '');
+  assert.equal(cells[1].check?.problem, 'longer than 5 characters; cut to fit');
+  assert.equal(cells[1].check?.shown, 'abcde');
+});
+
+function orphanPdf(): Uint8Array {
+  const widget = (t: string, y: number, extra: string) =>
+    `<< /Type /Annot /Subtype /Widget /FT /Tx /T (${t}) /Rect [50 ${y} 300 ${y + 20}] /F 4 /DA (/Helv 12 Tf 0 g)${extra} >>`;
+  const objects = [
+    '<< /Type /Catalog /Pages 2 0 R /AcroForm << /Fields [4 0 R 5 0 R] /DA (/Helv 12 Tf 0 g) >> >>',
+    '<< /Type /Pages /Kids [3 0 R] /Count 1 >>',
+    '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Annots [4 0 R] >>',
+    widget('placed', 700, ''),
+    widget('loose', 650, ' /MaxLen 8'),
+  ];
+  let out = '%PDF-1.7\n';
+  const offsets: number[] = [];
+  objects.forEach((body, i) => {
+    offsets.push(out.length);
+    out += `${i + 1} 0 obj\n${body}\nendobj\n`;
+  });
+  const xref = out.length;
+  out += `xref\n0 ${objects.length + 1}\n0000000000 65535 f \n`;
+  for (const o of offsets) out += `${String(o).padStart(10, '0')} 00000 n \n`;
+  out += `trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF\n`;
+  return new TextEncoder().encode(out);
+}
+
+test('a form read from a file keeps a widget on the first page and drops one on no page', async () => {
+  const t = fromFile('orphan.pdf', await PdfDoc.load(orphanPdf()));
+  assert.deepEqual(t.fields.map((f) => f.name), ['placed', 'loose']);
+  assert.deepEqual(t.pages, [{ w: 612, h: 792 }]);
+  assert.deepEqual(t.shapes.get('placed'), [{ page: 0, x: 50, y: 72, w: 250, h: 20, on: null }]);
+  assert.deepEqual(t.shapes.get('loose'), []);
+});
+
+test('a form read from a file has no length limit unless the field sets one', async () => {
+  const t = fromFile('orphan.pdf', await PdfDoc.load(orphanPdf()));
+  assert.equal(t.fields[0].maxLen, 0);
+  assert.equal(t.fields[1].maxLen, 8);
 });

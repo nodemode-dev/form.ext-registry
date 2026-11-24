@@ -433,3 +433,55 @@ test('the error code table matches the contract', () => {
     REFUSED: -32004,
   });
 });
+
+test('toBase64 encodes known byte sequences', () => {
+  assert.equal(sdk.toBase64(new Uint8Array([1, 2, 3])), 'AQID');
+  assert.equal(sdk.toBase64(new Uint8Array([])), '');
+  assert.equal(sdk.toBase64(new Uint8Array([104, 105])), 'aGk=');
+  assert.equal(sdk.toBase64(new Uint8Array([255, 255, 255])), '////');
+});
+
+test('fromBase64 decodes known strings and the empty string', () => {
+  assert.deepEqual([...sdk.fromBase64('AQID')], [1, 2, 3]);
+  assert.deepEqual([...sdk.fromBase64('')], []);
+  assert.deepEqual([...sdk.fromBase64('aGk=')], [104, 105]);
+});
+
+test('70000 bytes of every value round trip and match Buffer base64', () => {
+  const bytes = new Uint8Array(70000);
+  for (let i = 0; i < bytes.length; i++) bytes[i] = i % 256;
+  const encoded = sdk.toBase64(bytes);
+  assert.equal(encoded, Buffer.from(bytes).toString('base64'));
+  const decoded = sdk.fromBase64(encoded);
+  assert.equal(decoded.length, 70000);
+  assert.ok(decoded.every((value, i) => value === bytes[i]));
+  assert.equal(decoded[32768], 0);
+  assert.equal(decoded[65535], 255);
+  assert.equal(decoded[69999], 69999 % 256);
+});
+
+test('chunk boundary sizes round trip', () => {
+  for (const size of [0x7fff, 0x8000, 0x8001, 0x10000, 0x10001]) {
+    const bytes = new Uint8Array(size);
+    for (let i = 0; i < size; i++) bytes[i] = (i * 7 + 3) % 256;
+    const encoded = sdk.toBase64(bytes);
+    assert.equal(encoded, Buffer.from(bytes).toString('base64'), String(size));
+    assert.deepEqual(sdk.fromBase64(encoded), bytes, String(size));
+  }
+});
+
+test('fromBase64 decodes Buffer output to the original bytes', () => {
+  const bytes = new Uint8Array(70000);
+  for (let i = 0; i < bytes.length; i++) bytes[i] = (255 - (i % 256));
+  const decoded = sdk.fromBase64(Buffer.from(bytes).toString('base64'));
+  assert.equal(decoded.length, bytes.length);
+  assert.ok(decoded.every((value, i) => value === bytes[i]));
+});
+
+test('non-ASCII text round trips through utf-8 bytes and base64', () => {
+  const text = 'café über 日本語 \u{1f600}';
+  const encoded = sdk.toBase64(new TextEncoder().encode(text));
+  assert.equal(encoded, Buffer.from(text, 'utf8').toString('base64'));
+  assert.equal(new TextDecoder().decode(sdk.fromBase64(encoded)), text);
+  assert.equal(sdk.toBase64(new TextEncoder().encode('é')), 'w6k=');
+});

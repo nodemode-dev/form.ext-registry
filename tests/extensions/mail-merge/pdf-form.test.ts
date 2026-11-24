@@ -368,3 +368,101 @@ test('flattening removes the form and draws the values on the page', async () =>
   assert.ok(streams.some((s) => s.includes(hexOf('Katherine'))));
   assert.ok(streams.includes('0 0 12 12 re f'));
 });
+
+function oneFieldPdf(rect: string, extra: string, da = '/Helv 10 Tf 0 g'): Uint8Array {
+  return buildPdf([
+    '<< /Type /Catalog /Pages 2 0 R /AcroForm 3 0 R >>',
+    '<< /Type /Pages /Kids [4 0 R] /Count 1 >>',
+    `<< /Fields [5 0 R] /DA (${da}) >>`,
+    '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Annots [5 0 R] >>',
+    `<< ${widget(rect)} /FT /Tx /T (box) ${extra} >>`,
+  ]);
+}
+
+async function filledAppearance(rect: string, extra: string, da?: string, value = 'A'): Promise<{ ap: string; dict: PdfDict; o: Opened }> {
+  const o = await fill([['box', value]], oneFieldPdf(rect, extra, da));
+  assert.deepEqual(o.problems, ['']);
+  const wd = o.doc.dict(new PdfRef(field(o.form, 'box').widgets[0].num));
+  const n = o.doc.get(o.doc.dict(wd?.get('AP'))?.get('N'));
+  assert.ok(n instanceof PdfStream);
+  return { ap: latin1(n.data), dict: n.dict, o };
+}
+
+function tfSizes(ap: string): number[] {
+  return [...ap.matchAll(/\/FMHelv\s+([-\d.]+)\s+Tf/g)].map((m) => Number(m[1]));
+}
+
+const numbersOf = (o: Opened, v: unknown) => o.doc.array(v).map((x) => o.doc.number(x));
+
+test('a fixed size in the field DA is the font size of the appearance', async () => {
+  const { ap } = await filledAppearance('50 700 350 740', '/DA (/Helv 9 Tf 0 g)');
+  assert.deepEqual(tfSizes(ap), [9]);
+});
+
+test('DA size 0 on a tall field gives an automatic size capped at 12', async () => {
+  const { ap } = await filledAppearance('50 700 350 740', '/DA (/Helv 0 Tf 0 g)');
+  assert.deepEqual(tfSizes(ap), [12]);
+});
+
+test('DA size 0 on a very short field gives an automatic size of at least 4', async () => {
+  const { ap } = await filledAppearance('50 700 350 706', '/DA (/Helv 0 Tf 0 g)');
+  assert.deepEqual(tfSizes(ap), [4]);
+});
+
+test('DA size 0 on a middle height field follows the height', async () => {
+  const { ap } = await filledAppearance('50 700 350 712', '/DA (/Helv 0 Tf 0 g)');
+  const [size] = tfSizes(ap);
+  assert.ok(Math.abs(size - 7.2) < 0.01, `size ${size}`);
+});
+
+test('a border colour with no BS draws a 1 unit rectangle border', async () => {
+  const { ap } = await filledAppearance('50 700 250 720', '/MK << /BC [0 0 1] >>');
+  assert.match(ap, /0 0 1 RG\s+1 w\s+0\.5 0\.5 199 19 re S/);
+});
+
+test('a border colour with BS width 3 draws a 3 unit rectangle border', async () => {
+  const { ap } = await filledAppearance('50 700 250 720', '/MK << /BC [0] >> /BS << /W 3 >>');
+  assert.match(ap, /0 G\s+3 w\s+1\.5 1\.5 197 17 re S/);
+});
+
+test('underline border style draws one line along the bottom and no rectangle', async () => {
+  const { ap } = await filledAppearance('50 700 250 720', '/MK << /BC [0] >> /BS << /W 2 /S /U >>');
+  assert.match(ap, /2 w\s+0 1 m\s+200 1 l S/);
+  assert.equal(/re S/.test(ap), false, ap);
+});
+
+test('no border colour draws no border', async () => {
+  const { ap } = await filledAppearance('50 700 250 720', '/BS << /W 3 >>');
+  assert.equal(/\bre S\b/.test(ap), false, ap);
+  assert.equal(/\bl S\b/.test(ap), false, ap);
+  assert.equal(/\d w\b/.test(ap), false, ap);
+});
+
+function mapPoint(m: Array<number | null>, x: number, y: number): [number, number] {
+  const [a, b, c, d, e, f] = m as number[];
+  return [a * x + c * y + e, b * x + d * y + f];
+}
+
+test('an unrotated widget gets a BBox of its size and no Matrix', async () => {
+  const { dict, o } = await filledAppearance('50 700 250 720', '/MK << /R 0 >>');
+  assert.deepEqual(numbersOf(o, dict.get('BBox')), [0, 0, 200, 20]);
+  assert.equal(dict.has('Matrix'), false);
+});
+
+test('a widget rotated 90 gets a Matrix that maps the form box onto the widget', async () => {
+  const { dict, o } = await filledAppearance('50 700 70 800', '/MK << /R 90 >>');
+  assert.deepEqual(numbersOf(o, dict.get('BBox')), [0, 0, 100, 20]);
+  const m = numbersOf(o, dict.get('Matrix'));
+  assert.deepEqual(m, [0, 1, -1, 0, 20, 0]);
+  const corners = [mapPoint(m, 0, 0), mapPoint(m, 100, 0), mapPoint(m, 0, 20), mapPoint(m, 100, 20)];
+  assert.deepEqual([Math.min(...corners.map((p) => p[0])), Math.min(...corners.map((p) => p[1])), Math.max(...corners.map((p) => p[0])), Math.max(...corners.map((p) => p[1]))], [0, 0, 20, 100]);
+});
+
+test('a widget rotated 270 gets a Matrix that maps the form box onto the widget', async () => {
+  const { dict, o } = await filledAppearance('50 700 70 800', '/MK << /R 270 >>');
+  assert.deepEqual(numbersOf(o, dict.get('BBox')), [0, 0, 100, 20]);
+  const m = numbersOf(o, dict.get('Matrix'));
+  assert.deepEqual(m, [0, -1, 1, 0, 0, 100]);
+  const corners = [mapPoint(m, 0, 0), mapPoint(m, 100, 0), mapPoint(m, 0, 20), mapPoint(m, 100, 20)];
+  assert.deepEqual([Math.min(...corners.map((p) => p[0])), Math.min(...corners.map((p) => p[1])), Math.max(...corners.map((p) => p[0])), Math.max(...corners.map((p) => p[1]))], [0, 0, 20, 100]);
+});

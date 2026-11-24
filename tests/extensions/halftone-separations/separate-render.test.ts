@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { Cancelled, bands, separateCmyk, separateSpot, spotLut, type Job, type Picture } from '../../../extensions/halftone-separations/src/separate.ts';
 import type { Result } from '../../../extensions/halftone-separations/src/render.ts';
 import { screenPlate, type Screen } from '../../../extensions/halftone-separations/src/screen.ts';
-import { defaults } from '../../../extensions/halftone-separations/src/settings.ts';
+import { defaults, spotPlates } from '../../../extensions/halftone-separations/src/settings.ts';
 import type { Rgb } from '../../../extensions/halftone-separations/src/inks.ts';
 
 class FakeImageData {
@@ -24,7 +24,7 @@ class FakeChannel {
 (globalThis as Record<string, unknown>).MessageChannel = FakeChannel;
 (globalThis as Record<string, unknown>).window ??={ addEventListener: () => {}, parent: null };
 
-const { Renderer, composite, scaled } = await import('../../../extensions/halftone-separations/src/render.ts');
+const { Renderer, composite, scaled, plateLayer, plateFilm } = await import('../../../extensions/halftone-separations/src/render.ts');
 
 const job = (): Job => ({ cancelled: false, progress: () => {} });
 
@@ -372,4 +372,98 @@ test('composite multiplies overprinted inks on white paper', async () => {
   assert.deepEqual(Array.from(both.data), [0, 0, 0, 255]);
   const redOnly = await composite(r, [true, false], job());
   assert.deepEqual(Array.from(redOnly.data), [255, 0, 0, 255]);
+});
+
+async function encoded(make: () => Promise<string>): Promise<Uint8ClampedArray> {
+  let grabbed: { data: Uint8ClampedArray } | null = null;
+  (globalThis as Record<string, unknown>).document = {
+    createElement: () => ({
+      width: 0,
+      height: 0,
+      getContext: () => ({ putImageData: (img: { data: Uint8ClampedArray }) => { grabbed = img; } }),
+      toBlob: (ok: (b: unknown) => void) => ok({ arrayBuffer: async () => new Uint8Array([1]).buffer }),
+    }),
+  };
+  try {
+    await make();
+  } finally {
+    delete (globalThis as Record<string, unknown>).document;
+  }
+  assert.ok(grabbed, 'nothing was drawn');
+  return (grabbed as { data: Uint8ClampedArray }).data;
+}
+
+test('a plate layer writes ink red green blue then the plate value for every pixel in order', async () => {
+  const r: Result = { width: 2, height: 2, scale: 1, inks: [[10, 20, 30], [200, 150, 100]], paper: [255, 255, 255], plates: [Uint8Array.of(0, 64, 128, 255), new Uint8Array(4)] };
+  const data = await encoded(() => plateLayer(r, 0));
+  assert.deepEqual(Array.from(data), [10, 20, 30, 0, 10, 20, 30, 64, 10, 20, 30, 128, 10, 20, 30, 255]);
+  const second = await encoded(() => plateLayer({ ...r, plates: [new Uint8Array(4), Uint8Array.of(7, 0, 99, 255)] }, 1));
+  assert.deepEqual(Array.from(second), [200, 150, 100, 7, 200, 150, 100, 0, 200, 150, 100, 99, 200, 150, 100, 255]);
+});
+
+test('a plate layer on a wide picture fills all three rows of bytes without gaps', async () => {
+  const r: Result = { width: 3, height: 1, scale: 1, inks: [[1, 2, 3]], paper: [255, 255, 255], plates: [Uint8Array.of(9, 8, 7)] };
+  const data = await encoded(() => plateLayer(r, 0));
+  assert.equal(data.length, 12);
+  assert.deepEqual(Array.from(data), [1, 2, 3, 9, 1, 2, 3, 8, 1, 2, 3, 7]);
+});
+
+test('a plate film writes the same grey into red green and blue with alpha 255 for every pixel', async () => {
+  const r: Result = { width: 2, height: 2, scale: 1, inks: [[10, 20, 30]], paper: [255, 255, 255], plates: [Uint8Array.of(0, 64, 128, 255)] };
+  const data = await encoded(() => plateFilm(r, 0));
+  assert.deepEqual(Array.from(data), [255, 255, 255, 255, 191, 191, 191, 255, 127, 127, 127, 255, 0, 0, 0, 255]);
+});
+
+test('composite writes red green blue and alpha 255 in order for every pixel of a four pixel picture', async () => {
+  const r: Result = { width: 2, height: 2, scale: 1, inks: [[0, 0, 0]], paper: [200, 100, 50], plates: [Uint8Array.of(0, 255, 0, 255)] };
+  const img = await composite(r, [true], job());
+  assert.deepEqual(Array.from(img.data), [200, 100, 50, 255, 0, 0, 0, 255, 200, 100, 50, 255, 0, 0, 0, 255]);
+});
+
+test('composite multiplies each channel of the paper by its own ink transmission', async () => {
+  const r: Result = { width: 1, height: 2, scale: 1, inks: [[100, 50, 25]], paper: [200, 100, 50], plates: [Uint8Array.of(255, 0)] };
+  const img = await composite(r, [true], job());
+  assert.deepEqual(Array.from(img.data), [100, 50, 25, 255, 200, 100, 50, 255]);
+});
+
+test('rendering the same settings twice gives the same plates and a different ink gives different ones', async () => {
+  const r = new Renderer(solid(3, 3, [90, 90, 90, 255]));
+  const s = { ...defaults(), blackGeneration: 100 };
+  const a = await r.run(s, 1, 300, job());
+  const b = await r.run(s, 1, 300, job());
+  assert.deepEqual(a.plates, b.plates);
+  const c = await r.run({ ...s, blackGeneration: 0 }, 1, 300, job());
+  assert.notDeepEqual(a.plates, c.plates);
+  const d = await r.run(s, 1, 300, job());
+  assert.deepEqual(a.plates, d.plates);
+});
+
+test('a spot render after switching the ink set uses the new inks and matches a fresh renderer', async () => {
+  const red = solid(2, 2, [35, 35, 35, 255]);
+  const bluePink = { ...defaults(), mode: 'spot' as const, paper: '#ffffff', spot: spotPlates('blue-pink', 30) };
+  const blackRed = { ...defaults(), mode: 'spot' as const, paper: '#ffffff', spot: spotPlates('black-red', 30) };
+  const r = new Renderer(red);
+  const first = await r.run(bluePink, 1, 300, job());
+  const second = await r.run(blackRed, 1, 300, job());
+  assert.deepEqual(second.inks, [[35, 35, 35], [229, 59, 59]]);
+  assert.ok(second.plates[0].every((v) => v > 215), `black plate ${second.plates[0][0]}`);
+  assert.ok(second.plates[1].every((v) => v < 40), `red plate ${second.plates[1][0]}`);
+  const fresh = await new Renderer(red).run(blackRed, 1, 300, job());
+  assert.deepEqual(second.plates, fresh.plates);
+  assert.notDeepEqual(first.plates, second.plates);
+  const again = await r.run(blackRed, 1, 300, job());
+  assert.deepEqual(again.plates, second.plates);
+});
+
+test('a spot render after changing the paper colour uses the new paper and matches a fresh renderer', async () => {
+  const sheet = solid(20, 20, [128, 128, 128, 255]);
+  const white = { ...defaults(), mode: 'spot' as const, paper: '#ffffff', spot: spotPlates('black-red', 30) };
+  const grey = { ...white, paper: '#808080' };
+  const r = new Renderer(sheet);
+  const onWhite = await r.run(white, 1, 300, job());
+  const onCream = await r.run(grey, 1, 300, job());
+  assert.ok(onCream.plates.every((p) => p.every((v) => v <= 10)));
+  assert.ok(onWhite.plates.some((p) => p.some((v) => v > 0)));
+  assert.deepEqual(onCream.plates, (await new Renderer(sheet).run(grey, 1, 300, job())).plates);
+  assert.deepEqual((await r.run(white, 1, 300, job())).plates, onWhite.plates);
 });

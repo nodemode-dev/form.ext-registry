@@ -329,3 +329,129 @@ test('reading the document reports a closed document or its size and resolution'
   reply = { name: 'Scan', width: 10, height: 20, resolution: 600, mode: 'cmyk' };
   assert.deepEqual(await readDoc(), { open: true, name: 'Scan', width: 10, height: 20, resolution: 600, mode: 'cmyk' });
 });
+
+async function rowsOf(field: Uint8Array, width: number, height: number, dy: number): Promise<number[]> {
+  const out = await screenPlate(field, width, height, { angle: 0, lpi: 10, shape: 'round', density: 100, dx: 0, dy }, { ppi: 80, hard: true }, job(), 0, 1);
+  const rows: number[] = [];
+  for (let y = 0; y < height; y++) {
+    const row = Array.from(out.subarray(y * width, (y + 1) * width));
+    assert.ok(row.every((v) => v === row[0]), `row ${y} is uneven`);
+    rows.push(row[0]);
+  }
+  return rows;
+}
+
+function band(width: number, height: number, ...rows: number[]): Uint8Array {
+  const field = new Uint8Array(width * height);
+  for (const y of rows) field.fill(255, y * width, (y + 1) * width);
+  return field;
+}
+
+test('a vertical misregister of plus N moves the plate N rows down and minus N moves it N rows up', async () => {
+  const field = band(4, 9, 4);
+  assert.deepEqual(await rowsOf(field, 4, 9, 0), [0, 0, 0, 0, 255, 0, 0, 0, 0]);
+  assert.deepEqual(await rowsOf(field, 4, 9, 1), [0, 0, 0, 0, 0, 255, 0, 0, 0]);
+  assert.deepEqual(await rowsOf(field, 4, 9, 3), [0, 0, 0, 0, 0, 0, 0, 255, 0]);
+  assert.deepEqual(await rowsOf(field, 4, 9, -1), [0, 0, 0, 255, 0, 0, 0, 0, 0]);
+  assert.deepEqual(await rowsOf(field, 4, 9, -3), [0, 255, 0, 0, 0, 0, 0, 0, 0]);
+});
+
+test('a vertical misregister rounds to whole rows', async () => {
+  const field = band(4, 9, 4);
+  assert.deepEqual(await rowsOf(field, 4, 9, 2.4), [0, 0, 0, 0, 0, 0, 255, 0, 0]);
+  assert.deepEqual(await rowsOf(field, 4, 9, -2.4), [0, 0, 255, 0, 0, 0, 0, 0, 0]);
+});
+
+test('a vertical misregister repeats the first row above the plate and the last row below it', async () => {
+  const top = band(3, 6, 0);
+  assert.deepEqual(await rowsOf(top, 3, 6, 2), [255, 255, 255, 0, 0, 0]);
+  assert.deepEqual(await rowsOf(top, 3, 6, -2), [0, 0, 0, 0, 0, 0]);
+  const bottom = band(3, 6, 5);
+  assert.deepEqual(await rowsOf(bottom, 3, 6, -2), [0, 0, 0, 255, 255, 255]);
+  assert.deepEqual(await rowsOf(bottom, 3, 6, 2), [0, 0, 0, 0, 0, 0]);
+});
+
+test('a vertical misregister larger than the picture fills it with the clamped edge row', async () => {
+  assert.deepEqual(await rowsOf(band(2, 4, 0), 2, 4, 10), [255, 255, 255, 255]);
+  assert.deepEqual(await rowsOf(band(2, 4, 3), 2, 4, -10), [255, 255, 255, 255]);
+  assert.deepEqual(await rowsOf(band(2, 4, 3), 2, 4, 10), [0, 0, 0, 0]);
+});
+
+test('a horizontal and a vertical misregister together move the plate by both amounts', async () => {
+  const field = new Uint8Array(6 * 6);
+  field[2 * 6 + 1] = 255;
+  const out = await screenPlate(field, 6, 6, { angle: 0, lpi: 10, shape: 'round', density: 100, dx: 2, dy: 3 }, { ppi: 80, hard: true }, job(), 0, 1);
+  const on = Array.from(out).map((v, k) => (v ? k : -1)).filter((k) => k >= 0);
+  assert.deepEqual(on, [5 * 6 + 3]);
+});
+
+const RANKS = 4096;
+function thresholdAt(shape: DotShape, i: number, j: number): number {
+  return tile(shape)[j * 64 + i] * RANKS - 0.5;
+}
+function rankBetween(shape: DotShape, i: number, j: number, lo: number, hi: number, what: string) {
+  const r = thresholdAt(shape, i, j);
+  assert.ok(Math.abs(r - Math.round(r)) < 1e-3, `${shape} ${what} is not a whole rank: ${r}`);
+  assert.ok(Math.round(r) >= lo && Math.round(r) <= hi, `${shape} ${what} rank ${Math.round(r)} outside ${lo} to ${hi}`);
+}
+
+test('a square dot starts in the 4 centre cells and ends in the 4 corner cells and its edge midpoints sit in the outer ring', () => {
+  for (const [i, j] of [[31, 31], [32, 31], [31, 32], [32, 32]]) rankBetween('square', i, j, 0, 3, 'centre');
+  for (const [i, j] of [[0, 0], [63, 0], [0, 63], [63, 63]]) rankBetween('square', i, j, 4092, 4095, 'corner');
+  for (const [i, j] of [[0, 31], [0, 32], [63, 31], [63, 32], [31, 0], [32, 0], [31, 63], [32, 63]]) rankBetween('square', i, j, 3844, 4095, 'edge midpoint');
+});
+
+test('a diamond dot starts in the centre, ends in the corners and holds its edge midpoints at the half way ring', () => {
+  for (const [i, j] of [[31, 31], [32, 31], [31, 32], [32, 32]]) rankBetween('diamond', i, j, 0, 3, 'centre');
+  for (const [i, j] of [[0, 0], [63, 0], [0, 63], [63, 63]]) rankBetween('diamond', i, j, 4092, 4095, 'corner');
+  for (const [i, j] of [[0, 31], [0, 32], [63, 31], [63, 32], [31, 0], [32, 0], [31, 63], [32, 63]]) rankBetween('diamond', i, j, 2104, 2111, 'edge midpoint');
+});
+
+test('a line dot starts in the centre rows, its side edge midpoints close the middle rows and its top and bottom edge midpoints open the last rows', () => {
+  for (const [i, j] of [[31, 31], [32, 31], [31, 32], [32, 32]]) rankBetween('line', i, j, 0, 3, 'centre');
+  for (const [i, j] of [[0, 0], [63, 0], [0, 63], [63, 63]]) rankBetween('line', i, j, 4092, 4095, 'corner');
+  for (const [i, j] of [[0, 31], [0, 32], [63, 31], [63, 32]]) rankBetween('line', i, j, 124, 127, 'side edge midpoint');
+  for (const [i, j] of [[31, 0], [32, 0], [31, 63], [32, 63]]) rankBetween('line', i, j, 3968, 4095, 'top edge midpoint');
+});
+
+test('a cross dot starts in the centre, ends in the corners and its edge midpoints close the thin arms', () => {
+  for (const [i, j] of [[31, 31], [32, 31], [31, 32], [32, 32]]) rankBetween('cross', i, j, 0, 3, 'centre');
+  for (const [i, j] of [[0, 0], [63, 0], [0, 63], [63, 63]]) rankBetween('cross', i, j, 4092, 4095, 'corner');
+  for (const [i, j] of [[0, 31], [0, 32], [63, 31], [63, 32], [31, 0], [32, 0], [31, 63], [32, 63]]) rankBetween('cross', i, j, 244, 251, 'edge midpoint');
+});
+
+test('a round dot starts in the centre, ends in the corners and its edge midpoints close the half area dot', () => {
+  for (const [i, j] of [[31, 31], [32, 31], [31, 32], [32, 32]]) rankBetween('round', i, j, 0, 3, 'centre');
+  for (const [i, j] of [[0, 0], [63, 0], [0, 63], [63, 63]]) rankBetween('round', i, j, 4092, 4095, 'corner');
+  for (const [i, j] of [[0, 31], [0, 32], [63, 31], [63, 32], [31, 0], [32, 0], [31, 63], [32, 63]]) rankBetween('round', i, j, 2104, 2111, 'edge midpoint');
+});
+
+test('an ellipse dot starts in the centre, ends in the corners and is wider than tall at its edge midpoints', () => {
+  for (const [i, j] of [[31, 31], [32, 31], [31, 32], [32, 32]]) rankBetween('ellipse', i, j, 0, 3, 'centre');
+  for (const [i, j] of [[0, 0], [63, 0], [0, 63], [63, 63]]) rankBetween('ellipse', i, j, 4092, 4095, 'corner');
+  const side = tile('ellipse')[31 * 64];
+  const top = tile('ellipse')[31];
+  assert.ok(Math.abs(side - 0.5483) < 0.03, `side edge ${side}`);
+  assert.ok(Math.abs(top - 0.64) < 0.03, `top edge ${top}`);
+  assert.ok(side < top);
+});
+
+test('the spot angle sets hold one angle per ink for two three and four inks', () => {
+  assert.equal(SPOT_ANGLES.length, 3);
+  assert.deepEqual(SPOT_ANGLES.map((set) => set.length), [2, 3, 4]);
+  for (const preset of SPOT_PRESETS) assert.equal(SPOT_ANGLES[preset.inks.length - 2].length, preset.inks.length, preset.id);
+});
+
+test('no two inks in a spot angle set share an angle and every pair is at least 15 degrees apart', () => {
+  const gap = (a: number, b: number) => Math.min(Math.abs(a - b) % 90, 90 - (Math.abs(a - b) % 90));
+  for (const set of SPOT_ANGLES) {
+    assert.equal(new Set(set).size, set.length, set.join());
+    for (let a = 0; a < set.length; a++) for (let b = a + 1; b < set.length; b++) assert.ok(gap(set[a], set[b]) >= 15, `${set[a]} and ${set[b]} in ${set.join()}`);
+    for (const angle of set) assert.ok(angle >= 0 && angle < 90, `${angle}`);
+  }
+});
+
+test('the spot angle sets follow the process screen angles where the inks overlap', () => {
+  for (const set of SPOT_ANGLES.slice(1)) for (const angle of set) assert.ok(PROCESS_ANGLES.includes(angle), `${angle}`);
+  assert.deepEqual(SPOT_ANGLES[2], PROCESS_ANGLES.map((a, i) => (i === 3 ? 45 : a)));
+});

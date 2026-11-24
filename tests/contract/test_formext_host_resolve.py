@@ -553,3 +553,43 @@ def test_portal_root_does_not_create_anything(host, monkeypatch, tmp_path):
     monkeypatch.setattr(sys, "platform", "linux")
     host.portal_root()
     assert list(home.iterdir()) == []
+
+
+def load_with_id(host, portal, tmp_path, ext_id):
+    path = make_package(tmp_path, ext_id)
+    write_enabled(portal, [row_for(path, ext_id)])
+    return host.resolve(PRODUCT, APP_VERSION, APP, root=portal)
+
+
+@pytest.mark.parametrize("ext_id", ["ab", "a" * 64, "a-", "0a", "a" * 63 + "-", "a-b-c"])
+def test_ids_of_2_to_64_valid_characters_are_loaded(host, portal, tmp_path, ext_id):
+    found = load_with_id(host, portal, tmp_path, ext_id)
+    assert [(e.id, e.state) for e in found] == [(ext_id, "ready")]
+
+
+@pytest.mark.parametrize("ext_id", ["a", "a" * 65, "-ab", "-", "Ab", "aB", "ab_cd", "ab.cd", "a b"])
+def test_ids_of_wrong_length_or_characters_are_not_loaded(host, portal, tmp_path, ext_id):
+    found = load_with_id(host, portal, tmp_path, ext_id)
+    assert found == []
+
+
+def test_id_of_65_characters_is_not_loaded_from_dev_json_either(host, portal, tmp_path):
+    ext_id = "a" * 65
+    path = make_package(tmp_path, ext_id)
+    write_dev(portal, [{"id": ext_id, "path": str(path)}])
+    assert host.resolve(PRODUCT, APP_VERSION, APP, root=portal) == []
+
+
+@pytest.mark.parametrize("bad_version", ["1.2", "1.2.3.4", "v1.2.3", "1.2.x", "1..3", "1.2.", "1,2,3"])
+def test_versions_that_are_not_three_numbers_are_refused(host, portal, tmp_path, bad_version):
+    path = make_package(tmp_path, version=bad_version)
+    write_enabled(portal, [row_for(path, version=bad_version)])
+    found = host.resolve(PRODUCT, APP_VERSION, APP, root=portal)
+    assert [e.state for e in found] == ["refused"]
+    assert "x.y.z" in found[0].reason
+
+
+@pytest.mark.parametrize("version", ["10.20.30", "0.0.0", "1.2.3", "100.200.300"])
+def test_versions_of_three_numbers_are_loaded(host, portal, tmp_path, version):
+    ext = resolve_one(host, portal, tmp_path, version=version)
+    assert (ext.state, ext.version, ext.reason) == ("ready", version, "")

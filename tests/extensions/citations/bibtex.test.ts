@@ -415,3 +415,74 @@ test('authors and editors of an entry are parsed with et al', async () => {
   ]);
   assert.equal(item.container, 'Essays');
 });
+
+test('every month macro from jan to dec gives its month number', async () => {
+  const macros = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+  const lib = await parse(macros.map((m, i) => `@article{m${i + 1}, year = 2020, month = ${m}}`).join('\n'));
+  assert.deepEqual(lib.warnings, []);
+  assert.deepEqual(lib.items.map((i) => i.issued?.month), [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
+  assert.ok(lib.items.every((i) => i.issued?.year === 2020 && i.issued?.day === undefined));
+});
+
+test('every month written as a full name or a quoted three letter form gives its month number', async () => {
+  const names = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  const lib = await parse(names.map((m, i) => `@article{n${i + 1}, year = 2020, month = {${m}}}\n@article{q${i + 1}, year = 2020, month = "${m.slice(0, 3).toUpperCase()}"}`).join('\n'));
+  assert.deepEqual(lib.warnings, []);
+  const months = lib.items.map((i) => i.issued?.month);
+  assert.deepEqual(months.filter((_, i) => i % 2 === 0), [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
+  assert.deepEqual(months.filter((_, i) => i % 2 === 1), [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
+});
+
+test('date field with a dash separated year month and day', async () => {
+  const lib = await parse('@article{a, date = {2021-03-07}}');
+  assert.deepEqual(lib.items[0].issued, { year: 2021, month: 3, day: 7 });
+});
+
+test('date field with a year and a month has no day', async () => {
+  const lib = await parse('@article{a, date = {2021-03}}');
+  assert.deepEqual(lib.items[0].issued, { year: 2021, month: 3 });
+  assert.equal(lib.items[0].issued?.day, undefined);
+});
+
+test('date field with slashes and single digit month and day', async () => {
+  const lib = await parse('@article{a, date = {2021/3/7}}\n@article{b, date = {2021-3-7}}\n@article{c, date = {2021/12}}');
+  assert.deepEqual(lib.items.map((i) => i.issued), [
+    { year: 2021, month: 3, day: 7 },
+    { year: 2021, month: 3, day: 7 },
+    { year: 2021, month: 12 },
+  ]);
+});
+
+test('date field with only a year has no month or day', async () => {
+  const lib = await parse('@article{a, date = {2021}}');
+  assert.deepEqual(lib.items[0].issued, { year: 2021 });
+  assert.equal(lib.items[0].issued?.month, undefined);
+  assert.equal(lib.items[0].issued?.day, undefined);
+});
+
+test('date field with two digit month and day and surrounding spaces', async () => {
+  const lib = await parse('@article{a, date = { 1999-12-31 }}');
+  assert.deepEqual(lib.items[0].issued, { year: 1999, month: 12, day: 31 });
+});
+
+test('date field wins over the year month and day fields', async () => {
+  const lib = await parse('@article{a, date = {2021-03-07}, year = {1999}, month = {dec}, day = {25}}');
+  assert.deepEqual(lib.items[0].issued, { year: 2021, month: 3, day: 7 });
+});
+
+test('a date that is not a date falls back to the year month and day fields', async () => {
+  const lib = await parse('@article{a, date = {spring 2021}, year = {2019}, month = {oct}, day = {4}}');
+  assert.deepEqual(lib.items[0].issued, { year: 2019, month: 10, day: 4 });
+});
+
+test('a date that is not a date and no year field leaves the item undated', async () => {
+  const lib = await parse('@article{a, title = {T}, date = {spring 2021}}\n@article{b, title = {T}, date = {}}');
+  assert.deepEqual(lib.warnings, []);
+  assert.equal(lib.items[0].issued, undefined);
+  assert.equal(lib.items[1].issued, undefined);
+});
+
+test('a year without four digits is kept as literal text', async () => {
+  const lib = await parse('@article{a, date = {n.d.}, year = {in press}}');
+  assert.deepEqual(lib.items[0].issued, { literal: 'in press' });
+});

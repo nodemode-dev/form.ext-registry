@@ -415,3 +415,79 @@ test("durationMs refuses an empty buffer, a zeroed buffer and a reserved header"
 test("durationMs refuses a start past the end of the data", async () => {
   await assert.rejects(durationMs(Uint8Array.from(frames(5)), 99999, noStep), NotMp3Error);
 });
+
+const STANDARD_KBPS: { name: string; ver: number; layer: number; kbps: number[] }[] = [
+  { name: "MPEG-1 Layer I", ver: 3, layer: 1, kbps: [32, 64, 96, 128, 160, 192, 224, 256, 288, 320, 352, 384, 416, 448] },
+  { name: "MPEG-1 Layer II", ver: 3, layer: 2, kbps: [32, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320, 384] },
+  { name: "MPEG-1 Layer III", ver: 3, layer: 3, kbps: [32, 40, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320] },
+  { name: "MPEG-2 Layer I", ver: 2, layer: 1, kbps: [32, 48, 56, 64, 80, 96, 112, 128, 144, 160, 176, 192, 224, 256] },
+  { name: "MPEG-2 Layer II", ver: 2, layer: 2, kbps: [8, 16, 24, 32, 40, 48, 56, 64, 80, 96, 112, 128, 144, 160] },
+  { name: "MPEG-2 Layer III", ver: 2, layer: 3, kbps: [8, 16, 24, 32, 40, 48, 56, 64, 80, 96, 112, 128, 144, 160] },
+];
+
+const expectedSize = (ver: number, layer: number, kbps: number): number => {
+  const rate = ver === 3 ? 48000 : 24000;
+  if (layer === 1) return Math.floor((12 * kbps * 1000) / rate) * 4;
+  if (layer === 2 || ver === 3) return Math.floor((144 * kbps * 1000) / rate);
+  return Math.floor((72 * kbps * 1000) / rate);
+};
+
+for (const t of STANDARD_KBPS) {
+  test(`frameAt maps every bitrate index 1 to 14 of ${t.name} to the standard's table`, () => {
+    assert.equal(t.kbps.length, 14);
+    for (let bi = 1; bi <= 14; bi++) {
+      const header = Uint8Array.from([0xff, 0xe0 | (t.ver << 3) | ((4 - t.layer) << 1) | 1, (bi << 4) | (1 << 2), 0x00]);
+      const info = frameAt(header, 0);
+      assert.ok(info, `index ${bi} should give a frame`);
+      assert.equal(info.size, expectedSize(t.ver, t.layer, t.kbps[bi - 1]), `${t.name} index ${bi} should be ${t.kbps[bi - 1]} kbps`);
+      assert.equal(info.rate, t.ver === 3 ? 48000 : 24000);
+      assert.equal(info.mpeg1, t.ver === 3);
+    }
+  });
+}
+
+test("a VBRI header gives the duration its four byte frame count implies, whatever the byte values", async () => {
+  const first = frames(1);
+  first.splice(36, 18, 0x56, 0x42, 0x52, 0x49, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0x01, 0x02, 0x03, 0x04);
+  const buf = Uint8Array.from([...first, ...frames(1)]);
+  close(await durationMs(buf, 0, noStep), 0x01020304 * 1152 * 1000 / 44100, 1e-3);
+});
+
+test("a VBRI frame count with the top bit set is read as an unsigned number", async () => {
+  const first = frames(1);
+  first.splice(36, 18, 0x56, 0x42, 0x52, 0x49, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0x80, 0x00, 0x00, 0x10);
+  const buf = Uint8Array.from([...first, ...frames(1)]);
+  close(await durationMs(buf, 0, noStep), 0x80000010 * 1152 * 1000 / 44100, 1);
+});
+
+test("a VBRI header in a mono MPEG-1 frame and in an MPEG-2 frame is still found at byte 36", async () => {
+  const mono = frames(1, [0xff, 0xfb, 0x90, 0xc0]);
+  mono.splice(36, 18, 0x56, 0x42, 0x52, 0x49, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x0b, 0xb8);
+  close(await durationMs(Uint8Array.from([...mono, ...frames(1, [0xff, 0xfb, 0x90, 0xc0])]), 0, noStep), 3000 * 1152 * 1000 / 44100);
+  const v2 = frames(1, [0xff, 0xf3, 0x80, 0x00], 208);
+  v2.splice(36, 18, 0x56, 0x42, 0x52, 0x49, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0x02, 0x03);
+  close(await durationMs(Uint8Array.from([...v2, ...frames(1, [0xff, 0xf3, 0x80, 0x00], 208)]), 0, noStep), 66051 * 576 * 1000 / 22050, 1e-3);
+});
+
+test("bytes at offset 36 that are not the VBRI tag do not set a frame count", async () => {
+  const first = frames(1);
+  first.splice(36, 18, 0x56, 0x42, 0x52, 0x58, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x07, 0xd0);
+  const buf = Uint8Array.from([...first, ...frames(1)]);
+  close(await durationMs(buf, 0, noStep), 2 * 1152 * 1000 / 44100);
+});
+
+test("check flags a chapter starting exactly at the audio length and one after it, not one just before", () => {
+  const at = check([ch(0, "A"), ch(100, "B")], 100);
+  assert.deepEqual(at.map((p) => [p.key, p.field]), [["k100", "start"]]);
+  const after = check([ch(0, "A"), ch(100.001, "B")], 100);
+  assert.deepEqual(after.map((p) => [p.key, p.field]), [["k100.001", "start"]]);
+  assert.deepEqual(check([ch(0, "A"), ch(99.999, "B")], 100), []);
+  assert.deepEqual(check([ch(0, "A"), ch(100.4, "B")], 100.5), []);
+  assert.deepEqual(check([ch(0, "A"), ch(100.5, "B")], 100.5).map((p) => p.key), ["k100.5"]);
+});
+
+test("check flags nothing for the end of the audio when the length is null, zero or negative", () => {
+  for (const len of [null, 0, -5]) {
+    assert.deepEqual(check([ch(0, "A"), ch(500, "B"), ch(9000, "C")], len), [], `length ${len}`);
+  }
+});
